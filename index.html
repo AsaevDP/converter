@@ -47,6 +47,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 .mode-btn.active{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-color:transparent;font-weight:500}
 .mode-btn:hover:not(.active){border-color:var(--blue2);color:var(--blue2)}
 .mode-hint{font-size:13px;color:var(--muted);margin-bottom:14px;text-align:center}
+.typo-toggle{display:flex;align-items:center;gap:8px;max-width:560px;width:100%;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+.typo-toggle input{width:16px;height:16px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
 footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -63,6 +65,10 @@ footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
     <p>или нажми кнопку и выбери файл<br>Файлы никуда не уходят — всё в браузере</p>
     <button class="btn-pick" onclick="document.getElementById('fileInput').click();event.stopPropagation()">Выбрать файл</button>
   </div>
+  <label class="typo-toggle" id="typoToggle">
+    <input type="checkbox" id="typoCheckbox" checked>
+    Применять русскую типографику (тире, кавычки-ёлочки, неразрывные пробелы — как в Tireo)
+  </label>
   <div id="status">
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <p class="status-text" id="statusText">Читаю файл...</p>
@@ -129,6 +135,110 @@ function closeLB(e){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLB()});
 
+// ── Tireo: русская типографика (портировано из Tireo-Win.ahk) ──
+// Правила берутся из настольного Tireo: неразрывные пробелы, тире,
+// кавычки-ёлочки, разряды чисел, сокращения, инициалы.
+const NBSP = ' ';
+const LETTERS = 'A-Za-zА-Яа-яЁё';
+
+const RU_AFTER = ["в","к","с","у","о","и","а","я","на","по","за","из","от","до","об","во","ко","со","не","ни","но","да","то","ты","мы","вы","он","их","её","им","для","под","над","при","без","про","или","либо","ибо","что","чем","как","так","она","оно","они","его","нас","вам","нам","том","тот","это","эта","эти","все","всё","тех","мой","моя","мои","наш","ваш","уже","ещё","вот","вон"];
+const RU_BEFORE = ["бы","ли","же"];
+const EN_AFTER = ["of","in","to","on","at","by","up","if","or","so","as","for","off","out","via","per","and","but","nor","yet","from","into","onto","upon","with","over","down","near","past","than","that","when","then","once","till","lest","whom"];
+const ABBREV = ["г.","гг.","в.","вв.","см.","ср.","напр.","т.е.","т.д.","т.п.","т.к.","руб.","коп.","кв.","куб.","г-н","г-жа","д-р","проф."];
+
+function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+// Регулярки компилируем один раз при загрузке — быстрее на больших лекциях
+const RU_AFTER_RE   = RU_AFTER.map(w=>new RegExp(`(?<![${LETTERS}])(${w}) `,'gi'));
+const RU_BEFORE_RE  = RU_BEFORE.map(w=>new RegExp(` (${w})(?![${LETTERS}])`,'gi'));
+const EN_AFTER_RE   = EN_AFTER.map(w=>new RegExp(`(?<![${LETTERS}])(${w}) `,'gi'));
+const ABBREV_RE     = ABBREV.map(a=>new RegExp(`(?<![${LETTERS}])(${escapeRe(a)}) `,'gi'));
+
+function fixWhitespace(text){
+  // Только схлопываем повторные пробелы — обрезку по краям строк не делаем,
+  // т.к. функция вызывается на кусочках текста между HTML-тегами и можно
+  // случайно съесть пробел-разделитель между словами.
+  return text.replace(/ {2,}/g,' ');
+}
+
+function fixQuotes(text){
+  text = text.replace(/"\s*([^"\r\n]+?)\s*"/g,'«$1»');
+  text = text.replace(/“\s*([^“”\r\n]+?)\s*”/g,'«$1»');
+  text = text.replace(/„\s*([^„“\r\n]+?)\s*“/g,'«$1»');
+  text = text.replace(/'\s*([^'\r\n]+?)\s*'/g,'‘$1’');
+  text = text.replace(new RegExp(`(?<=[${LETTERS}])'(?=[${LETTERS}])`,'g'),'’');
+  text = text.replace(/«{2,}/g,'«');
+  text = text.replace(/»{2,}/g,'»');
+  return text;
+}
+
+function fixDashes(text){
+  text = text.replace(/-{2,3}/g,'—');
+  text = text.replace(/(?<=\S)\s-\s(?=\S)/g, NBSP+'— ');
+  text = text.replace(/(?<!\d)(\d+)-(\d+)(?!\d)/g,'$1–$2');
+  text = text.replace(/(\d+-(?:й|го|ой|ая|ое|ые|ым|ом|его|му|м))\s/g,'$1'+NBSP);
+  return text;
+}
+
+function groupThousands(numStr){
+  let result='', count=0;
+  for(let i=numStr.length-1;i>=0;i--){
+    result = numStr[i]+result;
+    count++;
+    if(count===3 && i>0){ result = NBSP+result; count=0; }
+  }
+  return result;
+}
+
+function fixNumbers(text){
+  text = text.replace(/\(c\)/gi,'©').replace(/\(r\)/gi,'®').replace(/\(tm\)/gi,'™');
+  text = text.split('1/2').join('½').split('1/4').join('¼').split('3/4').join('¾');
+  text = text.replace(/\bUSD\b/gi,'$').replace(/\bEUR\b/gi,'€').replace(/\bGBP\b/gi,'£').replace(/\bJPY\b/gi,'¥');
+  text = text.replace(/([\$€£¥₽])\s+(?=\d)/g,'$1');
+  text = text.replace(/\d{5,}/g, m=>groupThousands(m));
+  text = text.replace(/(\d)\s?%/g,'$1'+NBSP+'%');
+  return text;
+}
+
+function fixAbbreviations(text){
+  for(const re of ABBREV_RE) text = text.replace(re,'$1'+NBSP);
+  return text;
+}
+function fixNbspRu(text){
+  for(const re of RU_AFTER_RE) text = text.replace(re,'$1'+NBSP);
+  for(const re of RU_BEFORE_RE) text = text.replace(re, NBSP+'$1');
+  return text;
+}
+function fixNbspEn(text){
+  for(const re of EN_AFTER_RE) text = text.replace(re,'$1'+NBSP);
+  return text;
+}
+function fixNames(text){
+  text = text.replace(new RegExp(`(?<![${LETTERS}])([A-ZА-ЯЁ]\\.)\\s(?=[A-ZА-ЯЁ]\\.)`,'g'),'$1'+NBSP);
+  text = text.replace(/([A-ZА-ЯЁ]\.)\s(?=[A-ZА-ЯЁёа-я][a-zа-яё]+)/g,'$1'+NBSP);
+  return text;
+}
+
+function applyTypography(text){
+  text = fixWhitespace(text);
+  text = fixQuotes(text);
+  text = fixNumbers(text);
+  text = fixDashes(text);
+  text = fixAbbreviations(text);
+  text = fixNbspRu(text);
+  text = fixNbspEn(text);
+  text = fixNames(text);
+  return text;
+}
+
+// Применяем типографику только к тексту между тегами — сами теги и
+// data:URI картинок внутри них не трогаем (иначе побьём base64/атрибуты)
+function applyTypographyHtml(html){
+  return html.split(/(<[^>]+>)/g).map(part=>
+    part.startsWith('<') ? part : applyTypography(part)
+  ).join('');
+}
+
 // ── Main ──
 async function processFile(file){
   document.getElementById('dropZone').style.display='none';
@@ -155,11 +265,14 @@ async function processFile(file){
     })
   });
 
-  setProgress(70,'Строю HTML...');
+  setProgress(85,'Применяю типографику...');
 
-  const title = extractTitle(result.value)||file.name.replace(/\.docx$/i,'');
-  _browserHtml = buildHtml(title, result.value);
-  _figmaHtml   = buildFigmaHtml(title, result.value);
+  const typoOn = document.getElementById('typoCheckbox').checked;
+  const converted = typoOn ? applyTypographyHtml(result.value) : result.value;
+
+  const title = extractTitle(converted)||file.name.replace(/\.docx$/i,'');
+  _browserHtml = buildHtml(title, converted);
+  _figmaHtml   = buildFigmaHtml(title, converted);
   _fileName    = file.name;
 
   setProgress(100,'Готово!');
@@ -172,7 +285,8 @@ async function processFile(file){
   document.getElementById('resultMeta').innerHTML=
     `📄 Файл: <span>${file.name}</span><br>`+
     `🖼️ Скриншотов: <span>${imgCounter}</span><br>`+
-    `📦 Размер HTML: <span>${sizeMb} МБ</span>`;
+    `📦 Размер HTML: <span>${sizeMb} МБ</span>`+
+    (typoOn?`<br>✒️ Типографика: <span>применена</span>`:'');
 
   document.getElementById('btnDownload').onclick=()=>{
     const html   = _currentMode==='figma' ? _figmaHtml : _browserHtml;
