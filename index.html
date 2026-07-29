@@ -124,7 +124,7 @@ function setMode(mode){
   document.getElementById('modeFigma').classList.toggle('active', mode==='figma');
   document.getElementById('modeHint').textContent = mode==='browser'
     ? 'Полная лекция со скроллом и лайтбоксом'
-    : 'Статичный макет 1280px — готов для импорта в Figma';
+    : 'Слайды 1280×720 по правилам вёрстки SmartComp — для импорта в Figma';
 }
 
 function setProgress(pct,text){
@@ -432,159 +432,260 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElement
 </html>`;
 }
 
-// ── Figma-mode builder — SmartComp template style ──
+// ── Figma-mode builder — слайды 1280×720 по «Правилам вёрстки SmartComp» ──
+// Контент из DOCX разбивается на слайды: шапка 40px, панель Glow справа,
+// скриншоты слева. Раскладка выбирается автоматически по числу скриншотов.
+
+const FG = {
+  SLIDE_W: 1280, SLIDE_H: 720,
+  HEAD_H: 40, BODY_H: 680,
+  GLOW_WIDE: 585, GLOW_NARROW: 310,
+  MAX_CONTENT_H: 440,   // сколько контента влезает в панель Glow
+  MAX_IMGS: 2           // максимум скриншотов на слайде
+};
+
+function fgEsc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// 1. Разбираем HTML от mammoth в плоский список блоков
+function figmaTokenize(raw){
+  const doc = new DOMParser().parseFromString('<div id="scroot">'+raw+'</div>','text/html');
+  const out = [];
+  (function walk(parent){
+    for(const el of parent.children){
+      const tag = el.tagName.toLowerCase();
+      if(/^h[1-6]$/.test(tag)){
+        const t = el.textContent.trim();
+        if(t) out.push({type:'h', level:+tag[1], text:t});
+      } else if(tag==='ul' || tag==='ol'){
+        const items = [...el.children]
+          .filter(li=>li.tagName.toLowerCase()==='li')
+          .map(li=>li.innerHTML.trim()).filter(Boolean);
+        if(items.length) out.push({type:'list', ordered:tag==='ol', items});
+      } else if(tag==='img'){
+        out.push({type:'img', src:el.getAttribute('src')});
+      } else if(tag==='p'){
+        // картинки вытаскиваем отдельно — они уходят в левую колонку слайда
+        [...el.querySelectorAll('img')].forEach(im=>out.push({type:'img', src:im.getAttribute('src')}));
+        const clone = el.cloneNode(true);
+        [...clone.querySelectorAll('img')].forEach(im=>im.remove());
+        const txt = clone.textContent.trim();
+        if(txt) out.push({type:'p', html:clone.innerHTML.trim(), text:txt});
+      } else if(tag==='table'){
+        out.push({type:'p', html:el.outerHTML, text:el.textContent.trim()});
+      } else {
+        walk(el);
+      }
+    }
+  })(doc.getElementById('scroot'));
+  return out;
+}
+
+// 2. Прикидываем высоту блока, чтобы понять, влезет ли он в панель Glow
+function figmaCost(b){
+  if(b.type==='h')    return b.level<=2 ? 42 : 34;
+  if(b.type==='p')    return 12 + Math.max(1, Math.ceil(b.text.length/56)) * 27;
+  if(b.type==='list') return b.items.reduce((s,i)=>{
+    const len = i.replace(/<[^>]+>/g,'').length;
+    return s + 41 + Math.floor(len/56) * 24;
+  },0);
+  return 0;
+}
+
+// 3. Группируем блоки в слайды: новый слайд на заголовке, при переполнении
+//    панели или когда набралось 2 скриншота
+function figmaGroup(blocks){
+  const slides = [];
+  const start = (heading)=>({heading: heading||'', blocks:[], imgs:[], h: heading?42:0});
+  let cur = start('');
+  const flush = ()=>{ if(cur.blocks.length || cur.imgs.length) slides.push(cur); };
+
+  for(const b of blocks){
+    if(b.type==='h'){
+      if(b.level===1) continue;               // h1 — заголовок лекции, уходит на титул
+      flush(); cur = start(b.text);
+      continue;
+    }
+    if(b.type==='img'){
+      if(cur.imgs.length >= FG.MAX_IMGS){ const hd=cur.heading; flush(); cur=start(hd); }
+      cur.imgs.push(b.src);
+      continue;
+    }
+    const c = figmaCost(b);
+    if(cur.h + c > FG.MAX_CONTENT_H && (cur.blocks.length || cur.imgs.length)){
+      const hd = cur.heading; flush(); cur = start(hd);
+    }
+    cur.blocks.push(b); cur.h += c;
+  }
+  flush();
+  return slides;
+}
+
+// 4. Рендер содержимого панели Glow
+function figmaRenderBlocks(blocks){
+  return blocks.map(b=>{
+    if(b.type==='p')    return `<p class="sc-p">${b.html}</p>`;
+    if(b.type==='list') return `<ul class="sc-items">`+b.items.map(i=>`<li>${i}</li>`).join('')+`</ul>`;
+    return '';
+  }).join('');
+}
+
+// 5. Один слайд
+function figmaSlide(slide, num, sectionFallback){
+  const n = slide.imgs.length;
+  // Раскладка 3 (2 колонки, белый фон) — только для FAQ-подобных разделов
+  // или больших текстовых блоков. Короткий текст без скриншота показываем
+  // обычной панелью Glow по центру, иначе колонки разорвут абзац пополам.
+  const faqLike = /вопрос|faq|ответ|памятк|итог|запомнит|словар/i.test(slide.heading||'');
+  const layout = n===0 ? ((faqLike || slide.h > 300) ? 'text' : 'solo')
+                       : (n===1 ? 'wide' : 'narrow');
+  const section = fgEsc(slide.heading || sectionFallback);
+
+  const head = `<div class="sl-head">`+
+    `<span class="hd-l"><b>${num}</b><i>|</i>${section}</span>`+
+    `<span class="hd-r">SmartComp <b>*3196</b></span></div>`;
+
+  const heading = slide.heading ? `<div class="sc-h">${fgEsc(slide.heading)}</div>` : '';
+  const content = heading + figmaRenderBlocks(slide.blocks);
+  const copy = `<div class="sl-copy">© SmartComp — материал является интеллектуальной собственностью компании</div>`;
+
+  // Раскладка 3: только текст (FAQ) — 2 колонки, без панели Glow, белый фон
+  if(layout==='text'){
+    return `<section class="slide slide-text">${head}
+  <div class="sl-body"><div class="text-2col">${content}</div></div>
+  ${copy}</section>`;
+  }
+
+  // Слайд без скриншота: одна панель Glow по центру
+  if(layout==='solo'){
+    return `<section class="slide">${head}
+  <div class="sl-body sl-solo"><div class="glow glow-wide">${content}</div></div>
+  ${copy}</section>`;
+  }
+
+  // Раскладки 1 и 2: скриншоты слева + панель Glow справа
+  const shots = slide.imgs.map(src=>`<div class="shot"><img src="${src}" alt=""></div>`).join('');
+  return `<section class="slide">${head}
+  <div class="sl-body">
+    <div class="sl-media">${shots}</div>
+    <div class="glow glow-${layout==='wide'?'wide':'narrow'}">${content}</div>
+  </div>
+  ${copy}</section>`;
+}
+
 function buildFigmaHtml(title, raw){
-  let h = raw;
+  const blocks = figmaTokenize(raw);
+  const slides = figmaGroup(blocks);
+  const subtitle = extractSubtitle(raw);
 
-  // 1. Чистим пустые теги
-  h=h.replace(/<p>\s*<\/p>/g,'');
+  // Титульный слайд + контентные слайды
+  const cover = `<section class="slide slide-cover">
+  <div class="cv-num">01</div>
+  <div class="cv-badge">Тайны нашего смартфона</div>
+  <h1 class="cv-title">${fgEsc(title)}</h1>
+  ${subtitle?`<p class="cv-sub">${fgEsc(subtitle)}</p>`:''}
+  <div class="cv-logo">SmartComp <b>*3196</b></div>
+</section>`;
 
-  // 2. Изображения → figure.screenshot с data-URI
-  h=h.replace(/(<img src="data:[^"]+)"([^>]*)\/?>/g,
-    (_,src,rest)=>`<figure class="screenshot"><div class="shot"><img ${src}" ${rest} alt=""></div></figure>`);
-
-  // 3. Заголовки
-  h=h.replace(/<h1[^>]*>/g,'<h1 class="title">');
-  h=h.replace(/<h2[^>]*>/g,'<h2 class="section-title">');
-  h=h.replace(/<h3[^>]*>/g,'<h3 class="sub-title">');
-  h=h.replace(/<h4[^>]*>/g,'<h4 class="sub-title" style="font-size:18px">');
-
-  // 4. Маркированные списки → sc-list
-  h=h.replace(/<ul>/g,'<ul class="sc-list">');
-
-  // 5. Нумерованные списки → sc-steps
-  h=h.replace(/<ol>/g,'<ol class="sc-steps">');
-
-  // 6. Callout-блоки: ищем абзацы с ключевыми словами
-  //    Совет / Подсказка / Лайфхак → tip (зелёный)
-  //    Важно / Внимание / Обратите → warn (янтарный)
-  //    Безопасность / Осторожно / Мошенник / Никогда → safe (красный)
-  h=h.replace(/<p><strong>((?:Совет|Подсказка|Лайфхак)[^<]*)<\/strong>[:.]?\s*<\/p>\s*<p>([\s\S]*?)<\/p>/g,
-    (_,label,text)=>`<div class="callout tip"><div class="co-label">${label}</div><p>${text}</p></div>`);
-  h=h.replace(/<p><strong>((?:Важно|Внимание|Обратите[^<]*)?[^<]*)<\/strong>[:.]?\s*<\/p>\s*<p>([\s\S]*?)<\/p>/g,
-    (_,label,text)=>{
-      const lc=label.toLowerCase();
-      if(/безопасн|осторожн|мошенн|никогда|нельзя/.test(lc))
-        return `<div class="callout safe"><div class="co-label">${label}</div><p>${text}</p></div>`;
-      if(/важно|внимание|обратите/.test(lc))
-        return `<div class="callout warn"><div class="co-label">${label}</div><p>${text}</p></div>`;
-      return `<h3 class="sub-title">${label}</h3><p>${text}</p>`;
-    });
-
-  // 7. Bold-only абзац (короткий, без точки) → sub-title
-  h=h.replace(/<p><strong>([^<]{1,80})<\/strong><\/p>/g,(_,t)=>
-    /[.!?]$/.test(t.trim())
-      ? `<div class="callout tip"><div class="co-label">Совет</div><p>${t}</p></div>`
-      : `<h3 class="sub-title">${t}</h3>`
-  );
-
-  // 8. Чистим артефакты вложенности
-  h=h.replace(/<p>(<figure)/g,'$1');
-  h=h.replace(/(<\/figure>)<\/p>/g,'$1');
-  h=h.replace(/<p>\s*<\/p>/g,'');
-
-  const subtitle=extractSubtitle(raw);
+  const body = slides.map((s,i)=>figmaSlide(s, i+1, title)).join('\n');
 
   return `<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${title} — SmartComp</title>
+<title>${fgEsc(title)} — SmartComp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Days+One&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ═══ ДИЗАЙН-СИСТЕМА SMARTCOMP ═══════════════════════════════════ */
+/* ═══ ПРАВИЛА ВЁРСТКИ SMARTCOMP — слайды 1280×720 ═══════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --blue:#005BB4;
-  --blue2:#0C91CA;
-  --text:#0B1822;
-  --muted:#4A6070;
-  --bg:#F4F8FB;
-  --white:#FFFFFF;
-  --r:14px;
-  --tip:#1E7A66;   --tip-bg:#F0F7F5;
-  --warn:#9A6700;  --warn-bg:#FBF6EC;
-  --safe:#A23B38;  --safe-bg:#FAF1F0;
+  --text:#0B1822;        /* основной текст            */
+  --head-text:#001219;   /* текст шапки               */
+  --heading:#005BB3;     /* заголовки разделов        */
+  --muted:#4A6070;       /* вторичный текст           */
+  --bg:#F9F5F0;          /* фон содержания            */
+  --accent:#A23B38;      /* акцент / ошибка           */
+  --glow:#F4F4F4;        /* панель Glow (14%)         */
+  --item:#FFFFFF;        /* элемент списка            */
+  --cover:#FDFAFF;       /* фон превью                */
 }
-/* Figma-ready: фиксированная ширина, без sticky/vh/vw */
-body{font-family:'Roboto',sans-serif;font-size:18px;line-height:1.75;color:var(--text);background:var(--bg);width:1280px;margin:0;padding:0}
-/* ─── Шапка ─── */
-.sc-header{background:var(--white);border-bottom:3px solid var(--blue2);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,91,180,.07)}
-.logo{font-family:'Days One',sans-serif;font-size:22px;background:linear-gradient(135deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.tag{font-size:13px;color:var(--blue2);background:rgba(12,145,202,.09);border:1.5px solid var(--blue2);border-radius:20px;padding:4px 14px;font-family:'Days One',sans-serif}
-/* ─── Титульный блок ─── */
-.sc-hero{background:linear-gradient(135deg,#E8F4FF 0%,#EEFAFA 100%);padding:52px 40px 44px;border-bottom:1px solid rgba(0,91,180,.08)}
-.lec-num{font-family:'Days One',sans-serif;font-size:11px;color:var(--blue2);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.lec-num::before{content:'';width:28px;height:2px;background:linear-gradient(90deg,var(--blue),var(--blue2));border-radius:2px}
-h1.title{font-family:'Days One',sans-serif;font-size:38px;line-height:1.2;background:linear-gradient(135deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;max-width:780px}
-.subtitle{font-size:17px;color:var(--muted);max-width:660px;line-height:1.65}
-/* ─── Контент ─── */
-.sc-content{max-width:880px;padding:40px 40px 80px}
-h2.section-title{font-family:'Days One',sans-serif;font-size:24px;background:linear-gradient(135deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:52px 0 18px;padding-bottom:10px;border-bottom:2px solid rgba(12,145,202,.2)}
-h3.sub-title{font-family:'Days One',sans-serif;font-size:20px;color:var(--blue);margin:36px 0 12px}
-p{font-size:18px;color:var(--text);margin-bottom:14px;max-width:72ch}
-strong{color:var(--blue);font-weight:700}
-em{color:var(--muted);font-style:italic}
-a{color:var(--blue2);text-decoration:underline}
-/* ─── Карточка «Что узнаем» / «Что запомнить» ─── */
-.sc-card{background:var(--white);border-radius:var(--r);padding:22px 26px;margin:26px 0;border:1px solid rgba(12,145,202,.14);box-shadow:0 2px 10px rgba(0,91,180,.06)}
-.sc-card .card-label{font-family:'Days One',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.sc-card .card-label::after{content:'';flex:1;height:1px;background:rgba(12,145,202,.18)}
-.sc-card ul{list-style:none;display:flex;flex-direction:column;gap:8px}
-.sc-card li{font-size:17px;padding-left:26px;position:relative}
-.sc-card li::before{content:'—';position:absolute;left:0;color:var(--blue2);font-weight:700}
-/* ─── Списки-карточки ─── */
-.sc-list{list-style:none;margin:4px 0 20px;padding:0;display:flex;flex-direction:column;gap:6px}
-.sc-list li{font-size:17px;padding:9px 16px;background:var(--white);border-radius:10px;border-left:3px solid var(--blue2);box-shadow:0 1px 4px rgba(0,0,0,.04)}
-/* ─── Пошаговая инструкция ─── */
-.sc-steps{list-style:none;margin:4px 0 20px;display:flex;flex-direction:column;gap:8px}
-.sc-steps li{font-size:17px;padding:13px 18px;background:var(--white);border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-/* ─── Callout-блоки ─── */
-.callout{border-radius:10px;padding:16px 20px;margin:20px 0;border-left:3px solid;break-inside:avoid}
-.callout .co-label{font-family:'Days One',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
-.callout p{margin:0;font-size:17px;max-width:none}
-.callout p strong{color:inherit}
-.callout.tip{background:var(--tip-bg);border-color:var(--tip)}
-.callout.tip .co-label{color:var(--tip)}
-.callout.warn{background:var(--warn-bg);border-color:var(--warn)}
-.callout.warn .co-label{color:var(--warn)}
-.callout.safe{background:var(--safe-bg);border-color:var(--safe)}
-.callout.safe .co-label{color:var(--safe)}
-/* ─── Скриншот ─── */
-figure.screenshot{margin:24px 0;break-inside:avoid}
-figure.screenshot .shot{border-radius:var(--r);overflow:hidden;box-shadow:0 8px 28px rgba(0,91,180,.12);border:1px solid rgba(12,145,202,.10);background:#F8FAFC;display:flex;align-items:center;justify-content:center}
-figure.screenshot img{display:block;width:auto;height:auto;max-width:100%;max-height:620px;object-fit:contain}
-figure.screenshot figcaption{font-size:15px;color:var(--muted);text-align:center;margin-top:10px;font-style:italic}
-/* ─── Финальный блок ─── */
-.sc-final{background:linear-gradient(135deg,#E8F4FF 0%,#EEFAFA 100%);border-radius:var(--r);padding:26px 30px;margin:48px 0 0;border:1px solid rgba(0,91,180,.10);text-align:center}
-.sc-final p{max-width:none;margin-bottom:6px}
-.sc-final .final-title{font-family:'Days One',sans-serif;color:var(--blue);font-size:19px;margin-bottom:10px}
-/* ─── Футер ─── */
-.sc-footer{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;text-align:center;padding:22px 40px;font-family:'Days One',sans-serif;font-size:13px;letter-spacing:.5px;margin-top:60px}
+/* Geometria не входит в Google Fonts — если установлена в системе/Figma,
+   подхватится автоматически, иначе используется Roboto */
+body{background:#DDD5CC;padding:40px;display:flex;flex-direction:column;align-items:center;gap:40px;
+     font-family:'Geometria','Roboto',sans-serif;color:var(--text)}
+
+/* ─── Слайд ─── */
+.slide{width:1280px;height:720px;position:relative;overflow:hidden;flex-shrink:0;
+       background:var(--bg);
+       background-image:radial-gradient(circle at 18% 28%, #FFF6E9 0%, transparent 45%),
+                        radial-gradient(circle at 72% 78%, #E4F3F0 0%, transparent 50%),
+                        linear-gradient(135deg,#F9F5F0 0%,#F2EAE0 100%)}
+/* ─── Шапка 1280×40 ─── */
+.sl-head{height:40px;display:flex;align-items:center;justify-content:space-between;
+         padding:0 24px;font-family:'Days One',sans-serif;font-size:20px;color:var(--head-text)}
+.hd-l{display:flex;align-items:center;gap:10px}
+.hd-l i{font-style:normal;opacity:.45}
+.hd-r{font-size:16px;letter-spacing:.5px}
+.hd-r b{color:var(--heading)}
+/* ─── Контентная зона 1280×680 ─── */
+.sl-body{height:680px;display:flex;align-items:center;gap:40px;padding:0 40px}
+.sl-media{flex:1;display:flex;align-items:center;justify-content:center;gap:24px;height:100%}
+/* Скриншот телефона 281×622, скругление 10px */
+.shot{border-radius:10px;overflow:hidden;box-shadow:0 12px 34px rgba(11,24,34,.16);background:#fff;
+      display:flex;align-items:center;justify-content:center}
+.shot img{display:block;width:auto;height:auto;max-width:281px;max-height:622px;object-fit:contain}
+/* скругление 30px — только для обложки, скриншоты всегда 10px */
+/* ─── Панель Glow ─── */
+.glow{background:rgba(244,244,244,.14);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+      border-radius:15px;padding:20px;max-height:500px;overflow:hidden;flex-shrink:0;
+      border:1px solid rgba(255,255,255,.45);box-shadow:0 8px 30px rgba(11,24,34,.07)}
+.glow-wide{width:585px}
+.glow-narrow{width:310px}
+.sl-solo{justify-content:center}
+/* ─── Типографика ─── */
+.sc-h{font-family:'Days One',sans-serif;font-size:20px;color:var(--heading);margin-bottom:14px;line-height:1.3}
+.sc-p{font-size:18px;font-weight:500;line-height:1.5;color:var(--text);margin-bottom:12px}
+.sc-p:last-child{margin-bottom:0}
+.sc-p em{font-style:italic}
+.sc-p strong{font-weight:700;color:var(--heading)}
+a{color:var(--heading)}
+/* ─── Элементы списка ─── */
+.sc-items{list-style:none;display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.sc-items li{background:var(--item);border-radius:10px;min-height:33px;
+             display:flex;align-items:center;padding:6px 14px 6px 34px;position:relative;
+             font-size:18px;font-weight:500;line-height:1.35;color:var(--text)}
+.sc-items li::before{content:'→';position:absolute;left:13px;color:var(--heading);font-weight:700}
+.glow-wide .sc-items li{width:545px;max-width:100%}
+/* ─── Раскладка «только текст» (FAQ) ─── */
+.slide-text{background:#FFFFFF;background-image:none}
+.slide-text .sl-body{padding:44px 50px 0;align-items:flex-start}
+.text-2col{column-count:2;column-gap:44px;width:100%;max-height:590px}
+.text-2col .sc-h{column-span:all}
+.text-2col .sc-items li{break-inside:avoid}
+/* ─── Копирайт Roboto 6px ─── */
+.sl-copy{position:absolute;left:24px;bottom:10px;font-family:'Roboto',sans-serif;
+         font-size:6px;color:var(--head-text);opacity:.75;letter-spacing:.2px}
+/* ─── Титульный слайд ─── */
+.slide-cover{background:var(--cover);background-image:radial-gradient(circle at 78% 30%, #EAF4FF 0%, transparent 55%),
+                                                     radial-gradient(circle at 22% 80%, #FFF3E6 0%, transparent 55%);
+             display:flex;flex-direction:column;justify-content:center;padding:0 90px}
+.cv-num{font-family:'Days One',sans-serif;font-size:51px;color:var(--heading);line-height:1;margin-bottom:18px}
+.cv-badge{display:inline-block;align-self:flex-start;font-family:'Days One',sans-serif;font-size:14px;
+          color:var(--heading);background:rgba(0,91,179,.08);border:1.5px solid rgba(0,91,179,.35);
+          border-radius:20px;padding:6px 16px;margin-bottom:22px}
+.cv-title{font-family:'Days One',sans-serif;font-size:40px;color:var(--text);line-height:1.25;max-width:900px}
+.cv-sub{font-size:18px;font-weight:500;color:var(--muted);margin-top:18px;max-width:760px;line-height:1.5}
+.cv-logo{position:absolute;right:40px;bottom:34px;font-family:'Days One',sans-serif;font-size:16px;color:var(--head-text)}
+.cv-logo b{color:var(--heading)}
 </style>
 </head>
 <body>
-<header class="sc-header">
-  <span class="logo">SmartComp</span>
-  <span class="tag">Инструкция</span>
-</header>
-<div class="sc-hero">
-  <div class="lec-num">Материал курса</div>
-  <h1 class="title">${title}</h1>
-  ${subtitle?`<p class="subtitle">${subtitle}</p>`:''}
-</div>
-<main class="sc-content">
-${h}
-<div class="sc-final">
-  <div class="final-title">Вы отлично поработали</div>
-  <p>Не торопитесь — осваивайте новое постепенно, шаг за шагом.</p>
-  <p><em>Остались вопросы — задайте их на занятии, разберём вместе.</em></p>
-</div>
-</main>
-<footer class="sc-footer">&copy; SmartComp &mdash; Инструкция является интеллектуальной собственностью компании</footer>
+${cover}
+${body}
 </body>
 </html>`;
 }
