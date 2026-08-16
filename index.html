@@ -58,14 +58,21 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 .mode-btn:hover:not(.active){border-color:var(--blue2);color:var(--blue2)}
 .mode-hint{font-size:13px;color:var(--muted);margin-bottom:14px;text-align:center}
 .typo-toggle{display:flex;align-items:center;gap:8px;max-width:560px;width:100%;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
-.typo-toggle input{width:16px;height:16px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
+.typo-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
+.opt-row{display:flex;align-items:center;gap:10px;max-width:560px;width:100%;margin-top:10px;font-size:13px;color:var(--muted)}
+.opt-row select{flex:1;padding:7px 10px;border-radius:9px;border:1.5px solid rgba(12,145,202,.3);background:var(--white);color:var(--text);font-family:'Roboto',sans-serif;font-size:13px;cursor:pointer}
+.opt-row select:focus,.opt-row input:focus{outline:none;border-color:var(--blue2)}
+.opt-row input{flex:1;padding:7px 10px;border-radius:9px;border:1.5px solid rgba(12,145,202,.3);background:var(--white);color:var(--text);font-family:'Roboto',sans-serif;font-size:13px}
+.opt-row input.num{flex:0 0 64px;text-align:center}
+.size-warn{color:#C0392B;font-weight:500}
+.size-ok{color:#1E8449;font-weight:500}
 footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
 <header>
   <span class="logo-wrap"><img class="logo-icon" src="data:image/png;base64,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" alt="SmartComp"><span class="logo">SmartComp</span></span>
-  <span class="badge">DOCX → HTML Converter</span>
+  <span class="badge">DOCX → HTML Converter · v4</span>
 </header>
 <main>
   <div class="drop-zone" id="dropZone">
@@ -79,6 +86,19 @@ footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
     <input type="checkbox" id="typoCheckbox" checked>
     Применять русскую типографику (тире, кавычки-ёлочки, неразрывные пробелы — как в Tireo)
   </label>
+  <div class="opt-row">
+    <span>Курс:</span>
+    <input type="text" id="courseInput" placeholder="Клик за кликом осваиваем интернет и ПК">
+  </div>
+  <div class="opt-row">
+    <span>Скриншоты:</span>
+    <select id="shrinkSelect">
+      <option value="1920" selected>до 1920 px — качество как в оригинале</option>
+      <option value="1600">до 1600 px — если файл не проходит в плагин</option>
+      <option value="1280">до 1280 px — по ширине слайда, крайний случай</option>
+      <option value="0">не трогать совсем</option>
+    </select>
+  </div>
   <div id="status">
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <p class="status-text" id="statusText">Читаю файл...</p>
@@ -91,7 +111,7 @@ footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
       <button class="mode-btn" id="modeFigma" onclick="setMode('figma')">🎨 Figma</button>
     </div>
     <p class="mode-hint" id="modeHint">Полная лекция со скроллом и лайтбоксом</p>
-    <button class="btn-download" id="btnDownload">⬇️ Скачать HTML</button>
+    <div id="dlBox"></div>
     <button class="btn-reset" onclick="resetUI()">← Конвертировать ещё один</button>
   </div>
 </main>
@@ -105,7 +125,7 @@ footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
 const zone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 let _browserHtml = '';
-let _figmaHtml = '';
+let _figmaParts = [];
 let _fileName = '';
 let _currentMode = 'browser';
 zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('over')});
@@ -118,6 +138,29 @@ zone.addEventListener('drop', e=>{
 });
 fileInput.addEventListener('change', e=>{if(e.target.files[0]) processFile(e.target.files[0])});
 
+// Название курса и номер лекции живут между запусками: курс на серию
+// лекций один и тот же, вбивать его каждый раз незачем
+const COURSE_KEY = 'smartcomp-course';
+try{
+  const c = localStorage.getItem(COURSE_KEY);
+  if(c) document.getElementById('courseInput').value = c;
+}catch(e){ /* приватный режим — просто не запоминаем */ }
+
+function rememberMeta(){
+  try{
+    localStorage.setItem(COURSE_KEY, document.getElementById('courseInput').value);
+  }catch(e){}
+}
+
+// Номер лекции берём из имени файла: «Лекция 2. Оформление ПК.docx» → 2.
+// Если слова «лекция» нет — просто первое число в имени.
+let _lecNum = '';
+function lectureNumberFrom(fileName){
+  const name = fileName.replace(/\.docx$/i, '');
+  const m = name.match(/лекци[яю]\s*[№#]?\s*(\d{1,3})/i) || name.match(/(\d{1,3})/);
+  return m ? m[1] : '';
+}
+
 function setMode(mode){
   _currentMode = mode;
   document.getElementById('modeBrowser').classList.toggle('active', mode==='browser');
@@ -125,6 +168,7 @@ function setMode(mode){
   document.getElementById('modeHint').textContent = mode==='browser'
     ? 'Полная лекция со скроллом и лайтбоксом'
     : 'Слайды 1280×720 по правилам вёрстки SmartComp — для импорта в Figma';
+  renderDownloads();
 }
 
 function setProgress(pct,text){
@@ -249,6 +293,68 @@ function applyTypographyHtml(html){
   ).join('');
 }
 
+// ── Уменьшение скриншотов ────────────────────────────────────────────
+// Зачем: в HTML скриншоты лежат как base64, и лекция на 85 картинок
+// в оригинале весит под шестьдесят мегабайт. Плагин Figma передаёт
+// данные одним сообщением, и такой файл отвечает «payload too large
+// to transfer».
+//
+// Делаем только одно — уменьшаем слишком большие картинки. Палитру
+// не режем: на широких раскладках (скриншот 18:9 во всю ширину слайда)
+// потеря цвета сразу заметна, а экономия того не стоит.
+//
+// 1920 px выбраны не случайно: скриншоты приходят 1919 px, то есть
+// на этой ступени они вообще не пересчитываются и остаются исходными.
+// Уменьшаются только вертикальные снимки телефона (925×2048) — они
+// в макете стоят высотой 622 px, запас всё равно тройной.
+
+// Размеры каждой картинки: по ним слайд понимает, экран это компьютера
+// (шире, чем выше) или снимок телефона. Ключ — тот самый data URI,
+// который потом попадёт в разметку.
+const IMG_SIZES = new Map();
+
+function measureDataUri(dataUri){
+  return new Promise(resolve=>{
+    const img = new Image();
+    img.onload  = ()=>{ IMG_SIZES.set(dataUri, {w:img.naturalWidth, h:img.naturalHeight}); resolve(); };
+    img.onerror = ()=>resolve();
+    img.src = dataUri;
+  });
+}
+
+function shrinkDataUri(dataUri, maxSide){
+  return new Promise(resolve=>{
+    const img = new Image();
+    img.onload = ()=>{
+      try{
+        // Вписываем в квадрат maxSide×maxSide. Ограничивать одну ширину
+        // мало: вертикальные скриншоты телефона приходят узкими, но
+        // длинными и под ограничение по ширине не попадают вовсе.
+        const scale = Math.min(1, maxSide / img.width, maxSide / img.height);
+        if(scale === 1){ resolve(dataUri); return; }   // уменьшать нечего
+
+        const w = Math.max(1, Math.round(img.width  * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const out = c.toDataURL('image/png');
+        // Подстраховка: если вдруг стало тяжелее — отдаём оригинал
+        resolve(out.length < dataUri.length ? out : dataUri);
+      }catch(err){
+        console.warn('Уменьшить не удалось, беру оригинал:', err);
+        resolve(dataUri);
+      }
+    };
+    img.onerror = ()=>resolve(dataUri);   // битая картинка — пропускаем как есть
+    img.src = dataUri;
+  });
+}
+
 // ── Main ──
 async function processFile(file){
   document.getElementById('dropZone').style.display='none';
@@ -262,6 +368,12 @@ async function processFile(file){
 
   setProgress(30,'Извлекаю скриншоты...');
 
+  rememberMeta();
+  _lecNum = lectureNumberFrom(file.name);
+
+  const shrinkTo = parseInt(document.getElementById('shrinkSelect').value, 10) || 0;
+  let bytesBefore = 0, bytesAfter = 0;
+
   const result = await mammoth.convertToHtml({arrayBuffer},{
     convertImage: mammoth.images.imgElement(async (image)=>{
       imgCounter++;
@@ -270,8 +382,22 @@ async function processFile(file){
       const ct = image.contentType||'image/png';
       const ext = ct.includes('jpeg')?'jpg':ct.split('/')[1]||'png';
       imageMap[idx]={data,ext,ct};
-      // Встраиваем картинку сразу как data URI — не нужен ZIP!
-      return {src:`data:${ct};base64,${data}`};
+
+      let uri = `data:${ct};base64,${data}`;
+      bytesBefore += uri.length;
+
+      if(shrinkTo){
+        // Прогресс 30..80 %: общее число картинок заранее неизвестно,
+        // поэтому шкалу подтягиваем асимптотически — она не дёргается
+        // назад и не упирается в 80 раньше времени.
+        setProgress(30 + Math.round(50 * (1 - 1/(1 + imgCounter/25))),
+                    `Обрабатываю скриншот ${imgCounter}...`);
+        uri = await shrinkDataUri(uri, shrinkTo);
+      }
+      bytesAfter += uri.length;
+
+      await measureDataUri(uri);
+      return {src: uri};
     })
   });
 
@@ -282,33 +408,80 @@ async function processFile(file){
 
   const title = extractTitle(converted)||file.name.replace(/\.docx$/i,'');
   _browserHtml = buildHtml(title, converted);
-  _figmaHtml   = buildFigmaHtml(title, converted);
+  _figmaParts  = buildFigmaHtml(title, converted);
   _fileName    = file.name;
 
   setProgress(100,'Готово!');
 
-  const bytes = new Blob([_browserHtml],{type:'text/html'}).size;
-  const sizeMb = (bytes/1024/1024).toFixed(1);
+  const mb = b => (b/1024/1024).toFixed(1);
+  const browserMb = mb(new Blob([_browserHtml],{type:'text/html'}).size);
+  const figmaTotal = _figmaParts.reduce((a,p)=>a + p.bytes, 0);
+  const heaviest   = Math.max(..._figmaParts.map(p=>p.bytes));
+  const figmaOk    = heaviest <= FIGMA_LIMIT;
+
+  let shrinkLine = '';
+  if(shrinkTo && bytesBefore){
+    const saved = Math.round(100 * (1 - bytesAfter/bytesBefore));
+    shrinkLine = `🗜️ Скриншоты: <span>до ${shrinkTo} px, минус ${saved}%</span><br>`;
+  }else{
+    shrinkLine = `🗜️ Скриншоты: <span>без сжатия</span><br>`;
+  }
 
   document.getElementById('result').style.display='block';
   document.getElementById('status').style.display='none';
   document.getElementById('resultMeta').innerHTML=
     `📄 Файл: <span>${file.name}</span><br>`+
     `🖼️ Скриншотов: <span>${imgCounter}</span><br>`+
-    `📦 Размер HTML: <span>${sizeMb} МБ</span>`+
+    shrinkLine+
+    `🌐 Браузерный HTML: <span>${browserMb} МБ</span><br>`+
+    `🎨 Figma HTML: <span class="${figmaOk?'size-ok':'size-warn'}">${mb(figmaTotal)} МБ</span>`+
+    (_figmaParts.length > 1
+       ? ` — не влезает в плагин целиком, разбил на ${_figmaParts.length} файла`
+       : (figmaOk ? ' — пройдёт в плагин' : ' — плагин может отказать'))+
     (typoOn?`<br>✒️ Типографика: <span>применена</span>`:'');
 
-  document.getElementById('btnDownload').onclick=()=>{
-    const html   = _currentMode==='figma' ? _figmaHtml : _browserHtml;
-    const suffix = _currentMode==='figma' ? '-figma' : '';
-    const name   = _fileName.replace(/\.docx$/i,'').replace(/[^\wА-Яа-яёЁ]/g,'-').slice(0,40);
-    const blob   = new Blob([html],{type:'text/html;charset=utf-8'});
-    const a      = document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=name+suffix+'.html';
+  renderDownloads();
+}
+
+// Кнопки скачивания. Если Figma-файл пришлось разбить, на каждую часть
+// своя кнопка: видно диапазон слайдов и вес.
+function renderDownloads(){
+  const box = document.getElementById('dlBox');
+  if(!box) return;
+  box.innerHTML = '';
+
+  const mb   = b => (b/1024/1024).toFixed(1);
+  const name = _fileName.replace(/\.docx$/i,'').replace(/[^\wА-Яа-яёЁ]/g,'-').slice(0,40);
+
+  const save = (html, suffix)=>{
+    const blob = new Blob([html],{type:'text/html;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + suffix + '.html';
     a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
   };
+
+  const button = (label, html, suffix)=>{
+    const b = document.createElement('button');
+    b.className = 'btn-download';
+    b.textContent = label;
+    b.onclick = ()=>save(html, suffix);
+    box.appendChild(b);
+  };
+
+  if(_currentMode === 'browser'){
+    button('⬇️ Скачать HTML', _browserHtml, '');
+    return;
+  }
+  if(_figmaParts.length === 1){
+    button('⬇️ Скачать HTML', _figmaParts[0].html, '-figma');
+    return;
+  }
+  _figmaParts.forEach((part, i)=>{
+    button(`⬇️ Часть ${i+1} — слайды ${part.from}–${part.to}, ${mb(part.bytes)} МБ`,
+           part.html, `-figma-часть-${i+1}`);
+  });
 }
 
 // ── Helpers ──
@@ -402,6 +575,11 @@ p.intro-label{font-weight:500;color:var(--muted);font-size:16px;margin:20px 0 8p
 .lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);object-fit:contain;cursor:default}
 .lb-close{position:fixed;top:18px;right:24px;color:white;font-size:36px;cursor:pointer;line-height:1;opacity:.85}
 .sc-footer{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;text-align:center;padding:22px 40px;font-family:'Days One',sans-serif;font-size:13px;letter-spacing:.5px}
+/* Days One бывает только Regular — жирный тег внутри заголовка ломает
+   импорт в Figma запросом несуществующего начертания */
+h1.title, h2.section-title, h3.sub-title, h4.sub-sub-title,
+h1.title *, h2.section-title *, h3.sub-title *, h4.sub-sub-title *,
+.logo, .tag, .lec-num, .sc-footer{font-weight:400}
 @media(max-width:640px){.sc-hero{padding:34px 20px 30px}.sc-content{padding:22px 20px 56px}.sc-header{padding:12px 20px}}
 </style>
 </head>
@@ -443,6 +621,14 @@ const FG = {
   MAX_CONTENT_H: 440,   // сколько контента влезает в панель Glow
   MAX_IMGS: 2           // максимум скриншотов на слайде
 };
+
+// Подложка под фоновую иллюстрацию. Кладётся первым элементом каждого
+// слайда, включая титул и содержание. Имя слоя после импорта разные
+// плагины берут из разных мест, поэтому проставляем сразу все ходовые
+// атрибуты — какой-нибудь да подхватится.
+const BG_IMG = '<div class="bg-img" id="BG IMG" data-name="BG IMG" '+
+               'data-layer-name="BG IMG" data-figma-name="BG IMG" '+
+               'aria-label="BG IMG" title="BG IMG"></div>';
 
 function fgEsc(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -493,85 +679,312 @@ function figmaCost(b){
   return 0;
 }
 
-// 3. Группируем блоки в слайды: новый слайд на заголовке, при переполнении
-//    панели или когда набралось 2 скриншота
-function figmaGroup(blocks){
-  const slides = [];
-  const start = (heading)=>({heading: heading||'', blocks:[], imgs:[], h: heading?42:0});
-  let cur = start('');
-  const flush = ()=>{ if(cur.blocks.length || cur.imgs.length) slides.push(cur); };
+// Голый текст блока — нужен, чтобы искать ключевые слова вроде «пример»
+function blockText(b){
+  if(b.type === 'p')    return b.text || '';
+  if(b.type === 'list') return b.items.map(i=>i.replace(/<[^>]+>/g,'')).join(' ');
+  return '';
+}
+const EXAMPLE_RE = /пример/i;   // «пример», «примеры», «примером» — подпись «Пример N» на скриншот
+
+// 3. Пары «текст + картинки»
+//    В исходном DOCX текст всегда стоит ПЕРЕД картинкой и относится
+//    именно к ней. Поэтому режем поток не по переполнению панели,
+//    а по этой связке: копим текст, потом забираем все идущие следом
+//    картинки. Как только после картинок снова пошёл текст — пара
+//    закрыта, начинается следующая.
+function figmaPairs(blocks){
+  const pairs = [];
+  let heading = '';
+  let cur = {heading:'', blocks:[], imgs:[], newSection:false};
+  let curCost = 0;
+
+  const flush = ()=>{
+    if(cur.blocks.length || cur.imgs.length) pairs.push(cur);
+    cur = {heading, blocks:[], imgs:[], newSection:false};
+    curCost = 0;
+  };
 
   for(const b of blocks){
-    if(b.type==='h'){
-      if(b.level===1) continue;               // h1 — заголовок лекции, уходит на титул
-      flush(); cur = start(b.text);
+    if(b.type === 'h'){
+      if(b.level === 1) continue;          // h1 — название лекции, оно на титуле
+      flush();
+      heading = b.text;
+      cur.heading = heading;
+      cur.newSection = true;               // с заголовка всегда начинаем новый слайд
       continue;
     }
-    if(b.type==='img'){
-      if(cur.imgs.length >= FG.MAX_IMGS){ const hd=cur.heading; flush(); cur=start(hd); }
-      cur.imgs.push(b.src);
-      continue;
-    }
-    const c = figmaCost(b);
-    if(cur.h + c > FG.MAX_CONTENT_H && (cur.blocks.length || cur.imgs.length)){
-      const hd = cur.heading; flush(); cur = start(hd);
-    }
-    cur.blocks.push(b); cur.h += c;
+    if(b.type === 'img'){ cur.imgs.push(b.src); continue; }
+
+    // Текст после картинок — значит предыдущая связка закончилась
+    if(cur.imgs.length) flush();
+
+    // Текста одной темы набралось больше, чем влезает на панель —
+    // не ждём картинку или следующий заголовок, режем здесь.
+    // Так длинная тема без подзаголовков растягивается на 2+ слайда
+    // вместо того, чтобы вся копиться в одну связку.
+    const cost = figmaCost(b);
+    if(cur.blocks.length && curCost + cost > FG.MAX_CONTENT_H) flush();
+
+    cur.blocks.push(b);
+    curCost += cost;
   }
   flush();
+  return pairs;
+}
+
+// Какого рода картинки в паре. Скриншот с компьютера шире, чем выше;
+// снимок телефона наоборот. Размеры берём из замеров, сделанных при
+// обработке файла.
+function pairKind(pair){
+  if(!pair.imgs.length) return 'text';
+  const sizes = pair.imgs.map(src=>IMG_SIZES.get(src)).filter(Boolean);
+  if(!sizes.length) return 'desktop';                 // не измерили — считаем экраном ПК
+  return sizes.every(s=>s.w >= s.h) ? 'desktop' : 'phone';
+}
+
+// 4. Пары раскладываем по слайдам
+function figmaGroup(blocks){
+  const pairs = figmaPairs(blocks);
+  const slides = [];
+
+  const MAX_PHONE = 4;   // телефонов в ряд
+  const MAX_TEXT_H = 440;
+  const MAX_GLASS_H = 300;   // стеклянная плашка поверх скриншота уже текстовой панели — тексту там теснее
+
+  let i = 0;
+  while(i < pairs.length){
+    const pair = pairs[i];
+    const kind = pairKind(pair);
+
+    if(kind === 'desktop'){
+      // Плашка на скриншоте уже прошла общий лимит в figmaPairs, но он
+      // рассчитан на широкую текстовую панель. Для узкой стеклянной
+      // плашки лимит ниже — если всё ещё не влезает, отрезаем текст,
+      // который стоит дальше от картинки, отдельным текстовым слайдом
+      // перед ней. К картинке остаётся то, что было ближе всего к ней.
+      let glassBlocks = pair.blocks;
+      const glassCost = glassBlocks.reduce((a,b)=>a + figmaCost(b), 0);
+      if(glassCost > MAX_GLASS_H){
+        let cost = 0, cut = glassBlocks.length;
+        for(let j = glassBlocks.length - 1; j >= 0; j--){
+          const c = figmaCost(glassBlocks[j]);
+          if(cost + c > MAX_GLASS_H && cost > 0) break;
+          cost += c;
+          cut = j;
+        }
+        const overflow = glassBlocks.slice(0, cut);
+        glassBlocks = glassBlocks.slice(cut);
+        if(overflow.length){
+          slides.push({layout:'text', heading: pair.heading, blocks: overflow});
+        }
+      }
+
+      // Исключение: «Примеры кнопок…», «Пример работы…» и т.п. перед
+      // рядом однотипных скриншотов — каждый пример на свой слайд с
+      // подписью «Пример N», а не все скопом на одну плашку.
+      const introText = glassBlocks.map(blockText).join(' ');
+      if(EXAMPLE_RE.test(introText) && pair.imgs.length >= 2){
+        pair.imgs.forEach((src, idx)=>{
+          slides.push({
+            layout:'desktop',
+            heading: pair.heading,
+            blocks: idx === 0 ? glassBlocks : [],   // вступление — только на первом примере
+            imgs: [src],
+            exampleLabel: `Пример ${idx + 1}`
+          });
+        });
+        i++;
+        continue;
+      }
+
+      // Картинки без текста между ними — это один и тот же кусок текста
+      // на все сразу (дублировать подпись не нужно). Кладём все скриншоты
+      // связки на один слайд; сколько их и как расставить — потом руками
+      // в Figma.
+      slides.push({
+        layout:'desktop',
+        heading: pair.heading,
+        blocks: glassBlocks,
+        imgs: pair.imgs
+      });
+      i++;
+      continue;
+    }
+
+    if(kind === 'phone'){
+      // Соседние пары с телефонами собираем в один слайд колонками,
+      // пока их суммарно не больше четырёх и раздел не сменился
+      const cols = [];
+      let total = 0;
+      while(i < pairs.length){
+        const nx = pairs[i];
+        if(pairKind(nx) !== 'phone') break;
+        if(cols.length && nx.newSection) break;
+        if(total + nx.imgs.length > MAX_PHONE) break;
+        cols.push(nx); total += nx.imgs.length;
+        i++;
+      }
+      slides.push({layout:'phone', heading: cols[0].heading, cols});
+      continue;
+    }
+
+    // Текст без картинок. Соседние текстовые куски одного раздела
+    // сливаем, пока панель не переполнится
+    const textPair = {layout:'text', heading: pair.heading, blocks: [...pair.blocks], imgs: []};
+    let h = pair.heading ? 42 : 0;
+    for(const b of pair.blocks) h += figmaCost(b);
+    i++;
+    while(i < pairs.length){
+      const nx = pairs[i];
+      if(pairKind(nx) !== 'text' || nx.newSection) break;
+      const add = nx.blocks.reduce((a,b)=>a + figmaCost(b), 0);
+      if(h + add > MAX_TEXT_H) break;
+      textPair.blocks.push(...nx.blocks); h += add;
+      i++;
+    }
+    slides.push(textPair);
+  }
+
   return slides;
 }
 
-// 4. Рендер содержимого панели Glow
+// 5. Рендер текстовых блоков
 function figmaRenderBlocks(blocks){
   return blocks.map(b=>{
-    if(b.type==='p')    return `<p class="sc-p">${b.html}</p>`;
-    if(b.type==='list') return `<ul class="sc-items">`+b.items.map(i=>`<li>${i}</li>`).join('')+`</ul>`;
+    if(b.type === 'p')    return `<p class="sc-p">${b.html}</p>`;
+    if(b.type === 'list') return `<ul class="sc-items">`+b.items.map(i=>`<li>${i}</li>`).join('')+`</ul>`;
     return '';
   }).join('');
 }
 
-// 5. Один слайд
+// 6. Один слайд
 function figmaSlide(slide, num, sectionFallback){
-  const n = slide.imgs.length;
-  // Раскладка 3 (2 колонки, белый фон) — только для FAQ-подобных разделов
-  // или больших текстовых блоков. Короткий текст без скриншота показываем
-  // обычной панелью Glow по центру, иначе колонки разорвут абзац пополам.
-  const faqLike = /вопрос|faq|ответ|памятк|итог|запомнит|словар/i.test(slide.heading||'');
-  const layout = n===0 ? ((faqLike || slide.h > 300) ? 'text' : 'solo')
-                       : (n===1 ? 'wide' : 'narrow');
   const section = fgEsc(slide.heading || sectionFallback);
-
   const head = `<div class="sl-head">`+
-    `<span class="hd-l"><b>${num}</b><i>|</i>${section}</span>`+
-    `<span class="hd-r">SmartComp <b>*3196</b></span></div>`;
-
+    `<span class="hd-l"><span class="hd-num">${num}</span><i>|</i>${section}</span>`+
+    `<span class="hd-r">SmartComp <span class="hd-tel">*3196</span></span></div>`;
+  const copy = `<div class="sl-copy">Инструкция является интеллектуальной собственностью компании SmartComp и защищена авторским правом. Копирование или распространение материала третьим лицам карается законом Израиля.</div>`;
   const heading = slide.heading ? `<div class="sc-h">${fgEsc(slide.heading)}</div>` : '';
-  const content = heading + figmaRenderBlocks(slide.blocks);
-  const copy = `<div class="sl-copy">© SmartComp — материал является интеллектуальной собственностью компании</div>`;
 
-  // Раскладка 3: только текст (FAQ) — 2 колонки, без панели Glow, белый фон
-  if(layout==='text'){
-    return `<section class="slide slide-text">${head}
+  // ── Скриншоты компьютера: экран во весь слайд, текст стеклянной
+  //    плашкой поверх. Сторону чередуем, чтобы плашка не закрывала
+  //    всё время одно и то же место интерфейса.
+  if(slide.layout === 'desktop'){
+    const shots = slide.imgs.map(src=>`<div class="desk-shot"><img src="${src}" alt=""></div>`).join('');
+    const two   = slide.imgs.length > 1 ? ' desk-two' : '';
+    const side  = num % 2 === 0 ? 'glass-left' : 'glass-right';
+    // На слайде-примере название темы в плашке не повторяем — вместо
+    // него «Пример N», тема и так видна в шапке слайда
+    const glassHead = slide.exampleLabel ? `<div class="sc-h">${fgEsc(slide.exampleLabel)}</div>` : heading;
+    const text  = glassHead + figmaRenderBlocks(slide.blocks);
+    const glass = text ? `<div class="glass ${side}">${text}</div>` : '';
+    return `<section class="slide slide-desk">${BG_IMG}${head}
+  <div class="desk-media${two}">${shots}</div>
+  ${glass}
+  ${copy}</section>`;
+  }
+
+  // ── Телефоны: колонками, над каждой свой текст
+  if(slide.layout === 'phone'){
+    const cols = slide.cols.map(c=>{
+      const txt = figmaRenderBlocks(c.blocks);
+      const ims = c.imgs.map(src=>`<div class="ph-shot"><img src="${src}" alt=""></div>`).join('');
+      return `<div class="ph-col">`+
+             (txt ? `<div class="ph-txt">${txt}</div>` : '')+
+             `<div class="ph-shots">${ims}</div></div>`;
+    }).join('');
+    return `<section class="slide slide-phone">${BG_IMG}${head}
+  <div class="sl-body ph-cols">${cols}</div>
+  ${copy}</section>`;
+  }
+
+  // ── Только текст. Длинный кусок — в две колонки, короткий — панелью
+  //    по центру: колонки разорвали бы короткий абзац пополам.
+  const content = heading + figmaRenderBlocks(slide.blocks);
+  const long = slide.blocks.reduce((a,b)=>a + figmaCost(b), 0) > 300;
+  if(long){
+    return `<section class="slide slide-text">${BG_IMG}${head}
   <div class="sl-body"><div class="text-2col">${content}</div></div>
   ${copy}</section>`;
   }
-
-  // Слайд без скриншота: одна панель Glow по центру
-  if(layout==='solo'){
-    return `<section class="slide">${head}
+  return `<section class="slide">${BG_IMG}${head}
   <div class="sl-body sl-solo"><div class="glow glow-wide">${content}</div></div>
   ${copy}</section>`;
-  }
+}
 
-  // Раскладки 1 и 2: скриншоты слева + панель Glow справа
-  const shots = slide.imgs.map(src=>`<div class="shot"><img src="${src}" alt=""></div>`).join('');
-  return `<section class="slide">${head}
-  <div class="sl-body">
-    <div class="sl-media">${shots}</div>
-    <div class="glow glow-${layout==='wide'?'wide':'narrow'}">${content}</div>
-  </div>
-  ${copy}</section>`;
+// Плагин Figma не принимает файл тяжелее пятидесяти мегабайт, а ужимать
+// скриншоты нельзя — качество падает. Значит режем сам файл: слайды
+// раскладываются по нескольким HTML, каждый со своей оболочкой.
+// Нумерация слайдов при этом сквозная — она проставлена заранее.
+const FIGMA_LIMIT  = 50 * 1024 * 1024;   // потолок плагина
+const FIGMA_TARGET = 45 * 1024 * 1024;   // целимся ниже, чтобы был запас
+
+function figmaSplit(slideHtml, shell){
+  // Считаем по длине строки: скриншоты внутри — base64, то есть чистый
+  // ASCII, где символ равен байту. Кириллица в тексте занижает оценку,
+  // но её доля меньше процента, а запас до потолка в пять мегабайт.
+  const sizes = slideHtml.map(h=>h.length);
+  const shellSize = shell('').length;
+  const total = shellSize + sizes.reduce((a,b)=>a+b, 0);
+
+  const pack = (list, from) => ({
+    html:   shell(list.join('\n')),
+    from,
+    to:     from + list.length - 1,
+    slides: list.length,
+    bytes:  shellSize + list.reduce((a,h)=>a + h.length, 0)
+  });
+
+  if(total <= FIGMA_LIMIT) return [pack(slideHtml, 1)];
+
+  // Делим не «пока влезает», а на равные куски — иначе последняя часть
+  // выходит огрызком в пару слайдов
+  const n = Math.ceil(total / FIGMA_TARGET);
+  const target = total / n;
+
+  const parts = [];
+  let cur = [], curBytes = shellSize, from = 1;
+  slideHtml.forEach((h, i)=>{
+    if(cur.length && curBytes + sizes[i] > target && parts.length < n - 1){
+      parts.push(pack(cur, from));
+      from += cur.length;
+      cur = []; curBytes = shellSize;
+    }
+    cur.push(h); curBytes += sizes[i];
+  });
+  if(cur.length) parts.push(pack(cur, from));
+  return parts;
+}
+
+// Слайд содержания. Собираем по заголовкам разделов: берём первый слайд
+// каждого раздела и его номер. Номера уже с учётом того, что лекция
+// начинается с третьей страницы.
+function figmaToc(slides, firstContentPage){
+  const items = [];
+  let prev = null;
+  slides.forEach((sl, i)=>{
+    const h = (sl.heading || '').trim();
+    if(!h || h === prev) return;
+    prev = h;
+    items.push({text: h, page: i + firstContentPage});
+  });
+
+  const head = `<div class="sl-head">`+
+    `<span class="hd-l"><span class="hd-num">2</span><i>|</i>Содержание</span>`+
+    `<span class="hd-r">SmartComp <span class="hd-tel">*3196</span></span></div>`;
+
+  // Больше десяти пунктов в одну колонку не влезает
+  const cols = items.length > 10 ? ' toc-2col' : '';
+  const list = items.map(it=>
+    `<div class="toc-item"><span class="toc-t">${fgEsc(it.text)}</span>`+
+    `<span class="toc-n">${it.page}</span></div>`
+  ).join('');
+
+  return `<section class="slide slide-toc">${BG_IMG}${head}
+  <div class="sl-body"><div class="toc-wrap${cols}">${list}</div></div>
+  <div class="sl-copy">Инструкция является интеллектуальной собственностью компании SmartComp и защищена авторским правом. Копирование или распространение материала третьим лицам карается законом Израиля.</div>
+</section>`;
 }
 
 function buildFigmaHtml(title, raw){
@@ -579,18 +992,27 @@ function buildFigmaHtml(title, raw){
   const slides = figmaGroup(blocks);
   const subtitle = extractSubtitle(raw);
 
-  // Титульный слайд + контентные слайды
-  const cover = `<section class="slide slide-cover">
-  <div class="cv-num">01</div>
-  <div class="cv-badge">Тайны нашего смартфона</div>
-  <h1 class="cv-title">${fgEsc(title)}</h1>
+  const course = (document.getElementById('courseInput').value || '').trim();
+  const lecRaw = _lecNum;
+  // Номер на титуле в две цифры — «02», а не «2»
+  const lecNum = lecRaw ? String(lecRaw).padStart(2, '0') : '';
+
+  // Страница 1 — титул, страница 2 — содержание, лекция идёт с третьей
+  const FIRST_CONTENT_PAGE = 3;
+
+  const cover = `<section class="slide slide-cover">${BG_IMG}
+  ${lecNum ? `<div class="cv-num">${fgEsc(lecNum)}</div>` : ''}
+  ${course ? `<div class="cv-badge">${fgEsc(course)}</div>` : ''}
+  <div class="cv-title">${fgEsc(title)}</div>
   ${subtitle?`<p class="cv-sub">${fgEsc(subtitle)}</p>`:''}
-  <div class="cv-logo">SmartComp <b>*3196</b></div>
+  <div class="cv-logo">SmartComp <span class="hd-tel">*3196</span></div>
 </section>`;
 
-  const body = slides.map((s,i)=>figmaSlide(s, i+1, title)).join('\n');
+  const toc  = figmaToc(slides, FIRST_CONTENT_PAGE);
+  const body = slides.map((s,i)=>figmaSlide(s, i + FIRST_CONTENT_PAGE, title));
 
-  return `<!DOCTYPE html>
+  // Оболочка одна и та же для любой части: шрифты, стили, обёртка
+  const shell = inner => `<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -620,17 +1042,30 @@ body{background:#DDD5CC;padding:40px;display:flex;flex-direction:column;align-it
 
 /* ─── Слайд ─── */
 .slide{width:1280px;height:720px;position:relative;overflow:hidden;flex-shrink:0;
-       background:var(--bg);
-       background-image:radial-gradient(circle at 18% 28%, #FFF6E9 0%, transparent 45%),
-                        radial-gradient(circle at 72% 78%, #E4F3F0 0%, transparent 50%),
-                        linear-gradient(135deg,#F9F5F0 0%,#F2EAE0 100%)}
+       background:var(--bg)}
+/* ─── Подложка под фоновую иллюстрацию ───
+   Отдельным слоем, чтобы в Figma его можно было выделить на всех
+   слайдах разом и заменить содержимое через Fill → Generate fill.
+   Градиент лежит здесь, а не на самом слайде, — иначе после замены
+   картинки из-под неё проступал бы старый фон. */
+.bg-img{position:absolute;inset:0;z-index:0;
+        background-image:radial-gradient(circle at 18% 28%, #FFF6E9 0%, transparent 45%),
+                         radial-gradient(circle at 72% 78%, #E4F3F0 0%, transparent 50%),
+                         linear-gradient(135deg,#F9F5F0 0%,#F2EAE0 100%)}
+/* Содержимое слайда обязано лежать выше подложки. Позиционируем
+   только те элементы, что стоят в потоке: у логотипа и копирайта
+   уже есть position:absolute, и перебивать его нельзя — уедут. */
+.slide > *:not(.bg-img){z-index:1}
+.slide > .sl-head, .slide > .sl-body,
+.slide-cover > .cv-num, .slide-cover > .cv-badge,
+.slide-cover > .cv-title, .slide-cover > .cv-sub{position:relative}
 /* ─── Шапка 1280×40 ─── */
 .sl-head{height:40px;display:flex;align-items:center;justify-content:space-between;
          padding:0 24px;font-family:'Days One',sans-serif;font-size:20px;color:var(--head-text)}
 .hd-l{display:flex;align-items:center;gap:10px}
 .hd-l i{font-style:normal;opacity:.45}
 .hd-r{font-size:16px;letter-spacing:.5px}
-.hd-r b{color:var(--heading)}
+.hd-tel{color:var(--heading)}
 /* ─── Контентная зона 1280×680 ─── */
 .sl-body{height:680px;display:flex;align-items:center;gap:40px;padding:0 40px}
 .sl-media{flex:1;display:flex;align-items:center;justify-content:center;gap:24px;height:100%}
@@ -654,25 +1089,77 @@ body{background:#DDD5CC;padding:40px;display:flex;flex-direction:column;align-it
 .sc-p strong{font-weight:700;color:var(--heading)}
 a{color:var(--heading)}
 /* ─── Элементы списка ─── */
-.sc-items{list-style:none;display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.sc-items{list-style:none;display:flex;flex-direction:column;gap:8px;margin:10px 0;padding:0}
+.sc-items li::marker{content:''}
 .sc-items li{background:var(--item);border-radius:10px;min-height:33px;
-             display:flex;align-items:center;padding:6px 14px 6px 34px;position:relative;
+             border-left:3px solid var(--heading);box-shadow:0 1px 5px rgba(11,24,34,.07);
+             display:flex;align-items:center;padding:6px 16px;
              font-size:18px;font-weight:500;line-height:1.35;color:var(--text)}
-.sc-items li::before{content:'→';position:absolute;left:13px;color:var(--heading);font-weight:700}
 .glow-wide .sc-items li{width:545px;max-width:100%}
 /* ─── Раскладка «только текст» (FAQ) ─── */
-.slide-text{background:#FFFFFF;background-image:none}
+.slide-text{background:#FFFFFF}
+.slide-text .bg-img{background-image:none;background:#FFFFFF}
+.slide-text .sc-items li{background:#F7F9FB}
 .slide-text .sl-body{padding:44px 50px 0;align-items:flex-start}
 .text-2col{column-count:2;column-gap:44px;width:100%;max-height:590px}
 .text-2col .sc-h{column-span:all}
 .text-2col .sc-items li{break-inside:avoid}
+/* ─── Экран компьютера во весь слайд ───
+   Скриншот занимает всю площадь под шапкой, текст ложится поверх
+   стеклянной плашкой. Плашка не должна закрывать интерфейс целиком,
+   поэтому её ширина ограничена и сторона чередуется по слайдам. */
+.slide-desk .desk-media{position:absolute;top:40px;left:0;right:0;bottom:0;
+                        display:flex;flex-direction:column;align-items:center;
+                        justify-content:center;gap:12px;padding:14px 20px}
+.desk-shot{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.desk-shot img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;
+               border-radius:8px;box-shadow:0 10px 30px rgba(11,24,34,.18);display:block}
+/* Один экран — во всю высоту, два — по половине каждый */
+.desk-two .desk-shot{max-height:calc(50% - 6px)}
+
+/* Стеклянная плашка поверх экрана */
+.glass{position:absolute;top:74px;max-width:560px;z-index:2;
+       background:rgba(255,255,255,.72);backdrop-filter:blur(18px);
+       -webkit-backdrop-filter:blur(18px);border-radius:15px;padding:20px 24px;
+       box-shadow:0 10px 34px rgba(11,24,34,.14)}
+.glass-left{left:46px}
+.glass-right{right:46px}
+.glass .sc-p{margin-bottom:10px}
+.glass .sc-p:last-child{margin-bottom:0}
+
+/* ─── Телефоны колонками ───
+   Над каждой колонкой свой текст: в исходнике он стоит перед снимком
+   и относится именно к нему. */
+.slide-phone .ph-cols{align-items:flex-start;gap:22px;padding:22px 40px 0}
+.ph-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;height:620px}
+.ph-txt .sc-p{font-size:17px;margin-bottom:8px}
+.ph-txt .sc-items li{font-size:16px}
+.ph-shots{flex:1;min-height:0;display:flex;gap:12px;align-items:flex-start;justify-content:center}
+.ph-shot{flex:1;min-width:0;height:100%;display:flex;align-items:flex-start;justify-content:center}
+.ph-shot img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;
+             border-radius:10px;box-shadow:0 12px 34px rgba(11,24,34,.16);display:block}
+
+/* ─── Слайд содержания ─── */
+.slide-toc{background:#FFFFFF}
+.slide-toc .bg-img{background-image:none;background:#FFFFFF}
+.slide-toc .toc-item{background:#F7F9FB;box-shadow:0 1px 5px rgba(11,24,34,.07)}
+.slide-toc .sl-body{padding:34px 60px 0;align-items:flex-start}
+.toc-wrap{width:100%;display:flex;flex-direction:column;gap:8px;max-height:600px}
+.toc-wrap.toc-2col{display:block;column-count:2;column-gap:40px}
+.toc-item{display:flex;align-items:center;gap:14px;background:var(--item);border-radius:10px;
+          border-left:3px solid var(--heading);padding:9px 16px;min-height:38px;
+          font-size:18px;font-weight:500;line-height:1.3;color:var(--text);
+          break-inside:avoid;margin-bottom:8px}
+.toc-t{flex:1}
+.toc-n{font-family:'Days One',sans-serif;font-size:16px;color:var(--heading);flex-shrink:0}
 /* ─── Копирайт Roboto 6px ─── */
 .sl-copy{position:absolute;left:24px;bottom:10px;font-family:'Roboto',sans-serif;
          font-size:6px;color:var(--head-text);opacity:.75;letter-spacing:.2px}
 /* ─── Титульный слайд ─── */
-.slide-cover{background:var(--cover);background-image:radial-gradient(circle at 78% 30%, #EAF4FF 0%, transparent 55%),
-                                                     radial-gradient(circle at 22% 80%, #FFF3E6 0%, transparent 55%);
+.slide-cover{background:var(--cover);
              display:flex;flex-direction:column;justify-content:center;padding:0 90px}
+.slide-cover .bg-img{background-image:radial-gradient(circle at 78% 30%, #EAF4FF 0%, transparent 55%),
+                                      radial-gradient(circle at 22% 80%, #FFF3E6 0%, transparent 55%)}
 .cv-num{font-family:'Days One',sans-serif;font-size:51px;color:var(--heading);line-height:1;margin-bottom:18px}
 .cv-badge{display:inline-block;align-self:flex-start;font-family:'Days One',sans-serif;font-size:14px;
           color:var(--heading);background:rgba(0,91,179,.08);border:1.5px solid rgba(0,91,179,.35);
@@ -680,14 +1167,19 @@ a{color:var(--heading)}
 .cv-title{font-family:'Days One',sans-serif;font-size:40px;color:var(--text);line-height:1.25;max-width:900px}
 .cv-sub{font-size:18px;font-weight:500;color:var(--muted);margin-top:18px;max-width:760px;line-height:1.5}
 .cv-logo{position:absolute;right:40px;bottom:34px;font-family:'Days One',sans-serif;font-size:16px;color:var(--head-text)}
-.cv-logo b{color:var(--heading)}
+.cv-logo .hd-tel{color:var(--heading)}
+/* У Days One есть только Regular. Если внутрь такого заголовка попадёт
+   жирный тег, браузер запросит «Days One Bold», а Figma при импорте
+   остановится на диалоге подмены шрифтов. Поэтому вес фиксируем. */
+.sl-head, .sl-head *, .sc-h, .sc-h *,
+.cv-num, .cv-badge, .cv-title, .cv-title *, .cv-logo, .cv-logo *, .toc-n{font-weight:400}
 </style>
 </head>
 <body>
-${cover}
-${body}
-</body>
+${inner}</body>
 </html>`;
+
+  return figmaSplit([cover, toc, ...body], shell);
 }
 </script>
 </body>
