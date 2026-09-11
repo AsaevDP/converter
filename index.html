@@ -619,7 +619,8 @@ const FG = {
   HEAD_H: 40, BODY_H: 680,
   GLOW_WIDE: 585, GLOW_NARROW: 310,
   MAX_CONTENT_H: 440,   // сколько контента влезает в панель Glow
-  MAX_IMGS: 2           // максимум скриншотов на слайде
+  MAX_IMGS: 2,           // максимум скриншотов на слайде
+  PHONE_SHORT_TEXT: 145  // потолок «мало текста» у снимка телефона — примерно 5 строк
 };
 
 // Подложка под фоновую иллюстрацию. Кладётся первым элементом каждого
@@ -723,8 +724,14 @@ function figmaPairs(blocks){
     // не ждём картинку или следующий заголовок, режем здесь.
     // Так длинная тема без подзаголовков растягивается на 2+ слайда
     // вместо того, чтобы вся копиться в одну связку.
+    // Исключение: вводную фразу с двоеточием («…зависит от:») нельзя
+    // отрывать от списка, который её поясняет — иначе фраза повисает
+    // одна на предыдущем слайде, а список остаётся без подписи.
+    const prevBlock = cur.blocks[cur.blocks.length - 1];
+    const introToList = b.type === 'list' && prevBlock && prevBlock.type === 'p'
+      && /:\s*$/.test(prevBlock.text.trim());
     const cost = figmaCost(b);
-    if(cur.blocks.length && curCost + cost > FG.MAX_CONTENT_H) flush();
+    if(cur.blocks.length && !introToList && curCost + cost > FG.MAX_CONTENT_H) flush();
 
     cur.blocks.push(b);
     curCost += cost;
@@ -748,7 +755,8 @@ function figmaGroup(blocks){
   const pairs = figmaPairs(blocks);
   const slides = [];
 
-  const MAX_PHONE = 4;   // телефонов в ряд
+  const MAX_PHONE_COLS = 4;   // колонок с коротким текстом в ряд
+  const MAX_PHONE_SIDE = 2;   // снимков в связке, когда текста много и он ушёл вбок
   const MAX_TEXT_H = 440;
   const MAX_GLASS_H = 300;   // стеклянная плашка поверх скриншота уже текстовой панели — тексту там теснее
 
@@ -813,19 +821,29 @@ function figmaGroup(blocks){
     }
 
     if(kind === 'phone'){
-      // Соседние пары с телефонами собираем в один слайд колонками,
-      // пока их суммарно не больше четырёх и раздел не сменился
+      // У телефонной пары два варианта раскладки в зависимости от того,
+      // сколько текста относится к картинке (примерно 5 строк — потолок):
+      // - текста немного → колонками, текст над снимком, до 4 в ряд;
+      // - текста много → снимок(и) слева, текст одним блоком справа,
+      //   не больше 2 снимков в связке (иначе теснее некуда).
+      const textCost = pair.blocks.reduce((a,b)=>a + figmaCost(b), 0);
+      const short = textCost <= FG.PHONE_SHORT_TEXT && pair.imgs.length <= MAX_PHONE_COLS;
+
       const cols = [];
       let total = 0;
       while(i < pairs.length){
         const nx = pairs[i];
         if(pairKind(nx) !== 'phone') break;
         if(cols.length && nx.newSection) break;
-        if(total + nx.imgs.length > MAX_PHONE) break;
+        const nxCost = nx.blocks.reduce((a,b)=>a + figmaCost(b), 0);
+        const nxShort = nxCost <= FG.PHONE_SHORT_TEXT;
+        if(nxShort !== short) break;                          // не мешаем короткие и длинные в одном слайде
+        const limit = short ? MAX_PHONE_COLS : MAX_PHONE_SIDE;
+        if(total + nx.imgs.length > limit) break;
         cols.push(nx); total += nx.imgs.length;
         i++;
       }
-      slides.push({layout:'phone', heading: cols[0].heading, cols});
+      slides.push({layout: short ? 'phone-cols' : 'phone-side', heading: cols[0].heading, cols});
       continue;
     }
 
@@ -865,7 +883,9 @@ function figmaSlide(slide, num, sectionFallback){
     `<span class="hd-l"><span class="hd-num">${num}</span><i>|</i>${section}</span>`+
     `<span class="hd-r">SmartComp <span class="hd-tel">*3196</span></span></div>`;
   const copy = `<div class="sl-copy">Инструкция является интеллектуальной собственностью компании SmartComp и защищена авторским правом. Копирование или распространение материала третьим лицам карается законом Израиля.</div>`;
-  const heading = slide.heading ? `<div class="sc-h">${fgEsc(slide.heading)}</div>` : '';
+  // Название темы уже стоит в шапке слайда (sl-head) — второй раз в теле
+  // слайда его не дублируем. Исключение — подпись «Пример N» на слайде
+  // с примером скриншота: у неё нет пары в шапке.
 
   // ── Скриншоты компьютера: экран во весь слайд, текст стеклянной
   //    плашкой поверх. Сторону чередуем, чтобы плашка не закрывала
@@ -874,9 +894,7 @@ function figmaSlide(slide, num, sectionFallback){
     const shots = slide.imgs.map(src=>`<div class="desk-shot"><img src="${src}" alt=""></div>`).join('');
     const two   = slide.imgs.length > 1 ? ' desk-two' : '';
     const side  = num % 2 === 0 ? 'glass-left' : 'glass-right';
-    // На слайде-примере название темы в плашке не повторяем — вместо
-    // него «Пример N», тема и так видна в шапке слайда
-    const glassHead = slide.exampleLabel ? `<div class="sc-h">${fgEsc(slide.exampleLabel)}</div>` : heading;
+    const glassHead = slide.exampleLabel ? `<div class="sc-h">${fgEsc(slide.exampleLabel)}</div>` : '';
     const text  = glassHead + figmaRenderBlocks(slide.blocks);
     const glass = text ? `<div class="glass ${side}">${text}</div>` : '';
     return `<section class="slide slide-desk">${BG_IMG}${head}
@@ -885,8 +903,9 @@ function figmaSlide(slide, num, sectionFallback){
   ${copy}</section>`;
   }
 
-  // ── Телефоны: колонками, над каждой свой текст
-  if(slide.layout === 'phone'){
+  // ── Телефоны, текста немного (до ~5 строк на снимок): колонками,
+  //    текст над каждым своим снимком, до 4 в ряд.
+  if(slide.layout === 'phone-cols'){
     const cols = slide.cols.map(c=>{
       const txt = figmaRenderBlocks(c.blocks);
       const ims = c.imgs.map(src=>`<div class="ph-shot"><img src="${src}" alt=""></div>`).join('');
@@ -894,14 +913,28 @@ function figmaSlide(slide, num, sectionFallback){
              (txt ? `<div class="ph-txt">${txt}</div>` : '')+
              `<div class="ph-shots">${ims}</div></div>`;
     }).join('');
-    return `<section class="slide slide-phone">${BG_IMG}${head}
+    return `<section class="slide slide-phone-cols">${BG_IMG}${head}
   <div class="sl-body ph-cols">${cols}</div>
+  ${copy}</section>`;
+  }
+
+  // ── Телефоны, текста много: снимки слева в ряд (максимум 2),
+  //    весь относящийся к ним текст — одним блоком справа.
+  if(slide.layout === 'phone-side'){
+    const shots = slide.cols.flatMap(c=>c.imgs)
+      .map(src=>`<div class="ph-shot"><img src="${src}" alt=""></div>`).join('');
+    const text = slide.cols.map(c=>figmaRenderBlocks(c.blocks)).join('');
+    return `<section class="slide slide-phone-side">${BG_IMG}${head}
+  <div class="sl-body ph-row">
+    <div class="ph-shots">${shots}</div>
+    <div class="ph-txt">${text}</div>
+  </div>
   ${copy}</section>`;
   }
 
   // ── Только текст. Длинный кусок — в две колонки, короткий — панелью
   //    по центру: колонки разорвали бы короткий абзац пополам.
-  const content = heading + figmaRenderBlocks(slide.blocks);
+  const content = figmaRenderBlocks(slide.blocks);
   const long = slide.blocks.reduce((a,b)=>a + figmaCost(b), 0) > 300;
   if(long){
     return `<section class="slide slide-text">${BG_IMG}${head}
@@ -1127,15 +1160,26 @@ a{color:var(--heading)}
 .glass .sc-p{margin-bottom:10px}
 .glass .sc-p:last-child{margin-bottom:0}
 
-/* ─── Телефоны колонками ───
-   Над каждой колонкой свой текст: в исходнике он стоит перед снимком
-   и относится именно к нему. */
-.slide-phone .ph-cols{align-items:flex-start;gap:22px;padding:22px 40px 0}
+/* ─── Телефоны, текста мало (≤5 строк): колонками, текст над своим
+   снимком, до 4 в ряд — как читается в исходнике. */
+.slide-phone-cols .ph-cols{align-items:flex-start;gap:22px;padding:22px 40px 0}
 .ph-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;height:620px}
-.ph-txt .sc-p{font-size:17px;margin-bottom:8px}
-.ph-txt .sc-items li{font-size:16px}
-.ph-shots{flex:1;min-height:0;display:flex;gap:12px;align-items:flex-start;justify-content:center}
-.ph-shot{flex:1;min-width:0;height:100%;display:flex;align-items:flex-start;justify-content:center}
+.ph-col .ph-txt{flex:0 0 auto;height:auto;overflow:visible;padding-top:0}
+.ph-col .ph-shots{flex:1;min-height:0;height:auto;display:flex;gap:12px;
+                   align-items:flex-start;justify-content:center}
+.ph-col .ph-shot{flex:1;width:auto;min-width:0;height:100%}
+
+/* ─── Телефоны, текста много: снимки слева в ряд (максимум 2),
+   весь относящийся текст — одним блоком справа. */
+.slide-phone-side .ph-row{align-items:flex-start;gap:36px;padding:22px 40px 0}
+.slide-phone-side .ph-shots{flex:0 0 auto;display:flex;gap:20px;align-items:flex-start;height:620px}
+.slide-phone-side .ph-shot{width:230px;height:100%;display:flex;align-items:flex-start;justify-content:center}
+.slide-phone-side .ph-txt{flex:1;min-width:0;height:620px;overflow:hidden;padding-top:6px}
+
+/* Общее для обеих раскладок */
+.ph-txt .sc-p{font-size:18px;margin-bottom:14px}
+.ph-txt .sc-items li{font-size:17px}
+.ph-shot{display:flex;align-items:flex-start;justify-content:center}
 .ph-shot img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;
              border-radius:10px;box-shadow:0 12px 34px rgba(11,24,34,.16);display:block}
 
