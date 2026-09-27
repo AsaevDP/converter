@@ -89,7 +89,7 @@ footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
     <input type="file" id="fileInput" accept=".docx,.pdf">
     <span class="drop-icon">📄</span>
     <h2>Перетащи DOCX или PDF сюда</h2>
-    <p>DOCX лекции → HTML · PDF программы курса → карточка курса<br>или нажми кнопку и выбери файл. Файлы никуда не уходят — всё в браузере</p>
+    <p>DOCX лекции → HTML · PDF рассылки → паспорт курса<br>или нажми кнопку и выбери файл. Файлы никуда не уходят — всё в браузере</p>
     <button class="btn-pick" onclick="document.getElementById('fileInput').click();event.stopPropagation()">Выбрать файл</button>
   </div>
   <label class="typo-toggle" id="typoToggle">
@@ -1448,10 +1448,12 @@ ${inner}</body>
 }
 </script>
 <script>
-// ── Программа курса (PDF) → карточка курса (YAML) + файл для плагина Figma ──
+// ── Программа курса: PDF рассылки → паспорт курса (YAML) + файл для плагина Figma ──
 //
-// Порт engine/course_import.py и engine/course.py (завод, F:\MediaCombine).
-// Правила разбора и дат — те же; поменялись там — поменять и здесь.
+// Порт combine/course.py завода F:\MediaFactory (решения 45–52 в его
+// docs/state.md). Правила разбора и дат — те же; поменялись там — поменять
+// и здесь. Сверка: одинаковый текст рассылки → одинаковые course.yaml и
+// course.figma.json.
 //
 // Программы SmartComp пишутся по одному шаблону: «N встреча (дата время) –
 // Лекция N. Название», перенос названия строкой с маленькой буквы, пункты
@@ -1516,6 +1518,13 @@ function cpSlug(title){
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+// Папка курса завода: «2026-10 Современная безопасность глазами ИИ»
+// (решение 50, combine.course.folder_name + model.slugify). Кириллица остаётся.
+function cpFolderName(card){
+  return (cpIso(card.start).slice(0, 7) + ' ' + card.course)
+    .replace(/[<>:"/\\|?*]/g, '_').split(/\s+/).join(' ').replace(/^[ .]+|[ .]+$/g, '');
+}
+
 // Разбор текста программы: {course, start, meetings}, fixes — что починено.
 function cpParse(text){
   const fixes = [];
@@ -1551,7 +1560,7 @@ function cpParse(text){
   blocks.forEach((b, idx) => {
     const i = idx + 1;
     const where = 'встреча ' + b.number;
-    if(b.number !== i) fixes.push(`${where}: в программе номер ${b.number}, по порядку ${i} — исправлено`);
+    if(b.number !== i) fixes.push(`${where}: в рассылке номер ${b.number}, по порядку ${i} — исправлено`);
     const month = CP_MONTHS.indexOf(b.month) + 1;
     if(!month){ fixes.push(`${where}: не понял месяц «${b.month}»`); return; }
     const date = cpDate(firstMonth && month < firstMonth ? year + 1 : year, month, b.day);
@@ -1560,7 +1569,7 @@ function cpParse(text){
     const lm = title.match(CP_LECTURE), pm = title.match(CP_PRACTICE);
     if(lm){
       type = 'lecture'; lectureNo++;
-      if(+lm[1] !== lectureNo) fixes.push(`${where}: в программе «Лекция ${lm[1]}», по счёту это лекция ${lectureNo} — исправлено`);
+      if(+lm[1] !== lectureNo) fixes.push(`${where}: в рассылке «Лекция ${lm[1]}», по счёту это лекция ${lectureNo} — исправлено`);
       title = lm[2]; lecture = lectureNo;
     }else if(pm){
       type = 'practice'; lecture = lectureNo || +pm[1];
@@ -1570,7 +1579,7 @@ function cpParse(text){
       }
     }else{
       type = 'other'; lecture = lectureNo;
-      fixes.push(`${where}: ни «Лекция N», ни «Практика … №N» — тип проставить руками`);
+      fixes.push(`${where}: ни «Лекция N», ни «Практика … №N» — вид проставить руками`);
     }
 
     const about = [];
@@ -1586,7 +1595,7 @@ function cpParse(text){
 
   const times = [...new Set(meetings.map(x => x.time))].sort();
   const groupTimes = Object.values(CP_GROUPS);
-  if(times.length > 1) fixes.push('в программе разное время встреч: ' + times.join(', '));
+  if(times.length > 1) fixes.push('в рассылке разное время встреч: ' + times.join(', '));
   else if(times.length && !groupTimes.includes(times[0]))
     fixes.push(`время встреч ${times[0]} — не время ни одной группы (${groupTimes.join(', ')})`);
   if(meetings.length && start && cpIso(meetings[0].date) !== cpIso(start))
@@ -1626,19 +1635,19 @@ function cpYaml(card, fixes, source){
   const today = new Date();
   const out = [
     '# ' + '='.repeat(69),
-    '#  Карточка курса — один источник для всех артефактов курса.',
-    `#  Собрана конвертером из «${source}»`,
-    `#  ${cpDDMM(cpDate(today.getFullYear(), today.getMonth() + 1, today.getDate()), true)}. Опечатки не правятся — прочитать глазами.`,
+    '#  Паспорт курса (combine/course.py, решения 45–50).',
+    `#  Собран из «${source}» ${cpDDMM(cpDate(today.getFullYear(), today.getMonth() + 1, today.getDate()), true)}.`,
+    '#  Опечатки не правятся — прочитать глазами.',
   ];
   if(fixes.length){ out.push('#  Исправлено / посмотреть:'); fixes.forEach(f => out.push('#    - ' + f)); }
   out.push('# ' + '='.repeat(69), '',
     'course: ' + q(card.course),
     'start: ' + cpIso(card.start), '',
-    '# Группы идут по одним датам, различается только время.',
+    '# Группы идут по одним датам, различается время (решение 28).',
     'groups:',
     ...Object.entries(CP_GROUPS).map(([g, t]) => `  ${g}: { time: "${t}" }`), '',
-    '# number — номер встречи; lecture — номер лекции (у практики — той,',
-    '# что она разбирает). about — описание из программы, по пункту.',
+    '# number — номер встречи (он в имени файла); lecture — номер лекции,',
+    '# у практики — той, что она разбирает (решение 45).',
     'meetings:');
   card.meetings.forEach(m => {
     out.push(`  - number: ${m.number}`, `    date: ${cpIso(m.date)}`, `    type: ${m.type}`,
@@ -1646,7 +1655,7 @@ function cpYaml(card, fixes, source){
              ...m.about.map(a => '      - ' + q(a)), '');
   });
   out.push('# Встреча выпускников: дату объявляют на последней лекции. До того —',
-    '# предположение: первый вторник после старта следующего курса.',
+    '# догадка: первый вторник после старта следующего курса (решение 49).',
     'graduates:', '  date: ' + cpIso(grad), `  time: "${CP_GRADUATES_TIME}"`,
     '  confirmed: false        # true — когда дату объявили на лекции', '');
   return out.join('\n');
@@ -1679,7 +1688,7 @@ function cpForFigma(card, style){
 }
 
 
-// ── Интерфейс: PDF программы → карточка курса в папку клиента ──
+// ── Интерфейс: PDF рассылки → паспорт курса в папку завода ──
 
 const CP_PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/';
 let _cpPdfjs = null;
@@ -1728,7 +1737,7 @@ async function processProgram(file){
     if(!card.meetings.length || !card.start)
       throw new Error('не нашёл встреч «N встреча (дата время) – …» — это программа курса?');
     const {errors, notes} = cpCheck(card);
-    const name = cpIso(card.start).slice(0, 7) + '_' + cpSlug(card.course);
+    const name = cpFolderName(card);
     _cpResult = {name, card, fixes, errors, source: file.name, yaml: cpYaml(card, fixes, file.name)};
     setProgress(100, 'Готово!');
     cpShowResult(notes);
@@ -1757,7 +1766,7 @@ function cpShowResult(notes){
     `🎓 Курс: <span>${cpEsc(c.course)}</span><br>` +
     `📅 Старт: <span>${cpDateText(c.start)}, ${CP_WEEKDAYS[c.start.getUTCDay()]}</span><br>` +
     `🎉 Выпускники: <span>${cpDateText(grad)}, ${CP_GRADUATES_TIME}</span> — предположение<br>` +
-    `📄 Файл: <span>${cpEsc(r.name)}.yaml</span> + .json для плагина Figma` +
+    `📁 Папка курса: <span>${cpEsc(r.name)}</span> — course.yaml и course.figma.json` +
     `<ul class="cp-list">${list}</ul>` +
     box('cp-err', 'Ошибки — не сохраняю, сначала поправить:', r.errors) +
     box('cp-fix', 'Исправлено по ходу (записано и в шапку карточки):', r.fixes) +
@@ -1772,17 +1781,17 @@ function cpShowResult(notes){
   };
   if(r.errors.length) return;
   if(window.showDirectoryPicker){
-    btn('💾 Сохранить в папку клиента', 'btn-download', () => cpSave(false));
-    btn('Выбрать другую папку клиента', 'btn-reset cp-small', () => cpSave(true));
+    btn('💾 Сохранить в папку завода', 'btn-download', () => cpSave(false));
+    btn('Выбрать другую папку завода', 'btn-reset cp-small', () => cpSave(true));
     btn('⬇️ Просто скачать YAML и JSON', 'btn-reset cp-small', cpDownload);
   }else{
     btn('⬇️ Скачать YAML и JSON', 'btn-download', cpDownload);
   }
 }
 
-// ── Папка клиента: выбирается один раз, помнится в IndexedDB ──
-// Это F:\MediaCombine\clients\smartcomp — в ней client.yaml. Карточки
-// ложатся в courses\, стиль картинок берётся из assets\image-style.md.
+// ── Папка завода: выбирается один раз, помнится в IndexedDB ──
+// Это F:\MediaFactory — в нём combine\course.py. Паспорт ложится в
+// material\incoming\<курс>\, стиль картинок — из figma\image-style.md.
 function cpDb(){
   return new Promise((ok, fail) => {
     const rq = indexedDB.open('smartcomp-converter', 1);
@@ -1796,7 +1805,7 @@ async function cpHandle(set){
     const db = await cpDb();
     return await new Promise((ok, fail) => {
       const st = db.transaction('handles', set ? 'readwrite' : 'readonly').objectStore('handles');
-      const rq = set ? st.put(set, 'client') : st.get('client');
+      const rq = set ? st.put(set, 'factory') : st.get('factory');
       rq.onsuccess = () => ok(set || rq.result);
       rq.onerror = () => fail(rq.error);
     });
@@ -1808,10 +1817,10 @@ async function cpClientDir(pickNew){
   if(dir && (await dir.queryPermission({mode: 'readwrite'})) !== 'granted' &&
      (await dir.requestPermission({mode: 'readwrite'})) !== 'granted') dir = null;
   if(!dir){
-    dir = await window.showDirectoryPicker({id: 'smartcomp-client', mode: 'readwrite'});
-    try{ await dir.getFileHandle('client.yaml'); }
+    dir = await window.showDirectoryPicker({id: 'media-factory', mode: 'readwrite'});
+    try{ await (await dir.getDirectoryHandle('combine')).getFileHandle('course.py'); }
     catch(e){
-      alert('Это не папка клиента: в ней нет client.yaml.\nНужна F:\\MediaCombine\\clients\\smartcomp');
+      alert('Это не папка завода: в ней нет combine\\course.py.\nНужна F:\\MediaFactory');
       return null;
     }
     await cpHandle(dir);
@@ -1821,8 +1830,8 @@ async function cpClientDir(pickNew){
 
 async function cpStyle(dir){
   try{
-    const assets = await dir.getDirectoryHandle('assets');
-    const md = await (await (await assets.getFileHandle('image-style.md')).getFile()).text();
+    const figma = await dir.getDirectoryHandle('figma');
+    const md = await (await (await figma.getFileHandle('image-style.md')).getFile()).text();
     const m = md.match(/```style\s*\n([\s\S]*?)```/);
     return m ? m[1].split(/\s+/).join(' ').trim() : '';
   }catch(e){ return ''; }
@@ -1839,16 +1848,19 @@ async function cpSave(pickNew){
   try{
     const dir = await cpClientDir(pickNew);
     if(!dir) return;
-    const courses = await dir.getDirectoryHandle('courses', {create: true});
+    const incoming = await (await dir.getDirectoryHandle('material', {create: true}))
+      .getDirectoryHandle('incoming', {create: true});
+    const folder = await incoming.getDirectoryHandle(r.name, {create: true});
     let exists = true;
-    try{ await courses.getFileHandle(r.name + '.yaml'); }catch(e){ exists = false; }
-    if(exists && !confirm(`Карточка ${r.name}.yaml уже есть — её могли править руками.\nПерезаписать?`)) return;
+    try{ await folder.getFileHandle('course.yaml'); }catch(e){ exists = false; }
+    if(exists && !confirm(`Паспорт курса «${r.name}» уже есть — его могли править руками.\nПерезаписать?`)) return;
     const style = await cpStyle(dir);
-    await cpWrite(courses, r.name + '.yaml', r.yaml);
-    await cpWrite(courses, r.name + '.json', JSON.stringify(cpForFigma(r.card, style), null, 2));
+    await cpWrite(folder, 'course.yaml', r.yaml);
+    await cpWrite(folder, 'course.figma.json', JSON.stringify(cpForFigma(r.card, style), null, 2));
     document.getElementById('dlBox').insertAdjacentHTML('afterbegin',
-      `<div class="cp-box cp-ok">Сохранено в <b>${cpEsc(dir.name)}\\courses\\</b>: ${cpEsc(r.name)}.yaml и .json` +
-      (style ? '' : '<br>Стиль картинок не найден (assets\\image-style.md) — в промпте его не будет.') +
+      `<div class="cp-box cp-ok">Сохранено в <b>${cpEsc(dir.name)}\\material\\incoming\\${cpEsc(r.name)}\\</b>: ` +
+      'course.yaml и course.figma.json' +
+      (style ? '' : '<br>Стиль картинок не найден (figma\\image-style.md) — в промпте его не будет.') +
       '</div>');
   }catch(e){
     if(e.name !== 'AbortError') alert('Не сохранилось: ' + e.message);
@@ -1864,8 +1876,8 @@ function cpDownload(){
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   };
-  save(r.yaml, r.name + '.yaml', 'text/yaml;charset=utf-8');
-  setTimeout(() => save(JSON.stringify(cpForFigma(r.card, ''), null, 2), r.name + '.json', 'application/json'), 300);
+  save(r.yaml, 'course.yaml', 'text/yaml;charset=utf-8');
+  setTimeout(() => save(JSON.stringify(cpForFigma(r.card, ''), null, 2), 'course.figma.json', 'application/json'), 300);
 }
 </script>
 </body>
