@@ -67,19 +67,29 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 .size-warn{color:#C0392B;font-weight:500}
 .size-ok{color:#1E8449;font-weight:500}
 footer{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
+/* PDF программы → карточка курса */
+.cp-list{margin:12px 0 0 18px;font-size:13px;line-height:1.6;color:var(--text)}
+.cp-box{margin-top:12px;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5}
+.cp-box ul{margin:4px 0 0 18px}
+.cp-err{background:rgba(192,57,43,.08);border-left:3px solid #C0392B}
+.cp-fix{background:rgba(243,156,18,.10);border-left:3px solid #E67E22}
+.cp-note{background:rgba(12,145,202,.06);border-left:3px solid var(--blue2)}
+.cp-ok{background:rgba(30,132,73,.08);border-left:3px solid #1E8449;margin:0 0 12px}
+.cp-hint{margin-top:10px;font-size:12px;color:var(--muted)}
+.btn-reset.cp-small{margin-top:8px}
 </style>
 </head>
 <body>
 <header>
   <span class="logo-wrap"><img class="logo-icon" src="data:image/png;base64,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" alt="SmartComp"><span class="logo">SmartComp</span></span>
-  <span class="badge">DOCX → HTML Converter · v4</span>
+  <span class="badge">DOCX → HTML · PDF → курс · v4</span>
 </header>
 <main>
   <div class="drop-zone" id="dropZone">
-    <input type="file" id="fileInput" accept=".docx">
+    <input type="file" id="fileInput" accept=".docx,.pdf">
     <span class="drop-icon">📄</span>
-    <h2>Перетащи DOCX сюда</h2>
-    <p>или нажми кнопку и выбери файл<br>Файлы никуда не уходят — всё в браузере</p>
+    <h2>Перетащи DOCX или PDF сюда</h2>
+    <p>DOCX лекции → HTML · PDF программы курса → карточка курса<br>или нажми кнопку и выбери файл. Файлы никуда не уходят — всё в браузере</p>
     <button class="btn-pick" onclick="document.getElementById('fileInput').click();event.stopPropagation()">Выбрать файл</button>
   </div>
   <label class="typo-toggle" id="typoToggle">
@@ -132,11 +142,18 @@ zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('ove
 zone.addEventListener('dragleave', ()=>zone.classList.remove('over'));
 zone.addEventListener('drop', e=>{
   e.preventDefault();zone.classList.remove('over');
-  const f=e.dataTransfer.files[0];
-  if(f&&f.name.endsWith('.docx')) processFile(f);
-  else alert('Нужен файл .docx');
+  routeFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener('change', e=>{if(e.target.files[0]) processFile(e.target.files[0])});
+fileInput.addEventListener('change', e=>routeFile(e.target.files[0]));
+
+// DOCX — лекция в HTML; PDF — программа курса в карточку курса (ниже,
+// блок «Программа курса»).
+function routeFile(f){
+  if(!f) return;
+  if(/\.docx$/i.test(f.name)) processFile(f);
+  else if(/\.pdf$/i.test(f.name)) processProgram(f);
+  else alert('Нужен файл .docx (лекция) или .pdf (программа курса)');
+}
 
 // Название курса и номер лекции живут между запусками: курс на серию
 // лекций один и тот же, вбивать его каждый раз незачем
@@ -179,6 +196,9 @@ function resetUI(){
   document.getElementById('dropZone').style.display='block';
   document.getElementById('status').style.display='none';
   document.getElementById('result').style.display='none';
+  // после PDF программы переключатель режимов был спрятан
+  document.querySelector('.mode-toggle').style.display='';
+  document.getElementById('modeHint').style.display='';
   fileInput.value='';
 }
 function closeLB(e){
@@ -635,6 +655,13 @@ function fgEsc(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Короткие подписи-бренды перед скриншотом телефона («Iphone», «Samsung»,
+// «Xiaomi») — используются в двух местах: тут, в тэйлмоканизе (чтобы не
+// принять такую подпись за неформальный подзаголовок и не разрезать по
+// ней слайд), и ниже, в pairLabel() (чтобы поймать конец связки «3 бренда
+// подряд»). Объявляем один раз здесь, до первого использования.
+const BRAND_LABELS = ['iphone', 'samsung', 'xiaomi'];
+
 // 1. Разбираем HTML от mammoth в плоский список блоков
 function figmaTokenize(raw){
   const doc = new DOMParser().parseFromString('<div id="scroot">'+raw+'</div>','text/html');
@@ -657,8 +684,37 @@ function figmaTokenize(raw){
         [...el.querySelectorAll('img')].forEach(im=>out.push({type:'img', src:im.getAttribute('src')}));
         const clone = el.cloneNode(true);
         [...clone.querySelectorAll('img')].forEach(im=>im.remove());
+        const html = clone.innerHTML.trim();   // для рендера — <br> оставляем как есть
+        // <br> внутри абзаца (перенос строки внутри одного Word-абзаца, не
+        // новый абзац) для textContent невидим — соседние строки склеиваются
+        // без пробела («...внутри меню.Iphone»). Из-за этого pairLabel() не
+        // находит бренд на отдельной строке после длинной вводной фразы.
+        // Меняем <br> на текстовый перевод строки — только для текстового
+        // представления блока, на HTML-рендер (html выше) это не влияет.
+        [...clone.querySelectorAll('br')].forEach(br=>br.replaceWith('\n'));
         const txt = clone.textContent.trim();
-        if(txt) out.push({type:'p', html:clone.innerHTML.trim(), text:txt});
+        if(txt){
+          // Короткий абзац целиком жирным — это неформальный подзаголовок
+          // («Но есть важное правило безопасности», «С кем можно поделиться?»),
+          // и с него стоит начинать новый слайд — точно так же, как это уже
+          // делает buildHtml() для обычной HTML-страницы. Отличаем от жирных
+          // инструктивных примеров-цепочек («Google Карты → …», «Мама → …») —
+          // у них есть стрелка «→», подзаголовком они не считаются. Сам разрыв
+          // не вставляем здесь же — сначала нужно посмотреть, не подпись ли
+          // это к следующему скриншоту («Iphone», «Samsung»), это делает
+          // проход ниже, после того как собран весь список блоков.
+          //
+          // Отдельно: подпись-бренд сама по себе («Xiaomi») никогда не
+          // подзаголовок, даже если её (по ошибке в DOCX) не сразу сопровождает
+          // картинка — например, между подписью и снимком затесалась ещё одна
+          // фраза не по теме бренда. Проверка «следующий блок — картинка»
+          // здесь не спасает, поэтому короткие бренд-подписи исключаем сразу
+          // по тексту, без оглядки на соседние блоки.
+          const isBoldOnly = /^<strong>[^<]{1,60}<\/strong>$/i.test(html);
+          const isBrandLabel = BRAND_LABELS.includes(txt.toLowerCase());
+          const isSubheading = isBoldOnly && !isBrandLabel && !txt.includes('→') && !/[.,]$/.test(txt);
+          out.push({type:'p', html, text:txt, subheadingCandidate: isSubheading});
+        }
       } else if(tag==='table'){
         out.push({type:'p', html:el.outerHTML, text:el.textContent.trim()});
       } else {
@@ -666,7 +722,20 @@ function figmaTokenize(raw){
       }
     }
   })(doc.getElementById('scroot'));
-  return out;
+
+  // Жирную строку-«подзаголовок» превращаем в разрыв слайда — но только
+  // если она не подпись прямо перед скриншотом («Iphone», «Samsung» перед
+  // снимком телефона). У такой подписи впереди картинка, а не новый кусок
+  // текста — резать слайд перед ней не нужно.
+  const withBreaks = [];
+  for(let i = 0; i < out.length; i++){
+    const b = out[i];
+    if(b.subheadingCandidate && out[i+1] && out[i+1].type !== 'img'){
+      withBreaks.push({type:'break'});
+    }
+    withBreaks.push(b);
+  }
+  return withBreaks;
 }
 
 // 2. Прикидываем высоту блока, чтобы понять, влезет ли он в панель Glow
@@ -700,9 +769,9 @@ function figmaPairs(blocks){
   let cur = {heading:'', blocks:[], imgs:[], newSection:false};
   let curCost = 0;
 
-  const flush = ()=>{
+  const flush = (hardBreak)=>{
     if(cur.blocks.length || cur.imgs.length) pairs.push(cur);
-    cur = {heading, blocks:[], imgs:[], newSection:false};
+    cur = {heading, blocks:[], imgs:[], newSection:false, hardBreak: !!hardBreak};
     curCost = 0;
   };
 
@@ -713,6 +782,12 @@ function figmaPairs(blocks){
       heading = b.text;
       cur.heading = heading;
       cur.newSection = true;               // с заголовка всегда начинаем новый слайд
+      continue;
+    }
+    if(b.type === 'break'){
+      // Подзаголовок-жирная строка — режем здесь принудительно, но тему
+      // (heading) не трогаем: слайды по обе стороны — один и тот же раздел.
+      flush(true);
       continue;
     }
     if(b.type === 'img'){ cur.imgs.push(b.src); continue; }
@@ -750,14 +825,113 @@ function pairKind(pair){
   return sizes.every(s=>s.w >= s.h) ? 'desktop' : 'phone';
 }
 
+// Короткая подпись-«ярлык» скриншота («Iphone», «Samsung», «Xiaomi») —
+// нужна, чтобы поймать конец связки «3 бренда подряд». Ярлык — это
+// последний текстовый блок пары (ближайший к картинке), если он короткий.
+// Смотрим именно последний блок, а не всю пару целиком, — в первой связке
+// темы к ярлыку часто приклеен вводный текст предыдущего шага.
+//
+// Нюанс из реальных лекций: иногда в DOCX подпись бренда не вынесена
+// отдельным абзацем — слита с длинным поясняющим текстом («Iphone. На
+// Ios нужно пролистать в самый правый край рабочего стола.») или
+// приклеена к предыдущей фразе переносом строки внутри одного абзаца
+// («…внутри меню.\nIphone»). Проверка по длине абзаца такую подпись не
+// ловит, и разрыв по повтору ярлыка не срабатывает — 4-й снимок
+// соседнего шага прилипает к тройке предыдущего. Поэтому если абзац
+// длинный, всё равно ищем название бренда отдельным словом в начале
+// (перед точкой/запятой) или на последней строке после переноса.
+// BRAND_LABELS объявлен выше, перед figmaTokenize() — там же используется.
+
+function pairLabel(pair){
+  const last = pair.blocks[pair.blocks.length - 1];
+  if(!last || last.type !== 'p') return null;
+  const t = last.text.trim();
+  if(!t) return null;
+  if(t.length <= 20) return t.toLowerCase();
+
+  // Строк может быть больше двух («вводная фраза\nещё фраза\nIphone»,
+  // редко, но бывает) — проверяем каждую, берём последнее совпадение:
+  // ближе к концу блока — ближе к картинке, значит вернее для текущей пары.
+  const lines = t.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  let found = null;
+  for(const line of lines){
+    const lower = line.toLowerCase();
+    const firstWord = lower.split(/[\s.,:;!?]/)[0];
+    if(BRAND_LABELS.includes(firstWord)) found = firstWord;
+    else if(BRAND_LABELS.includes(lower)) found = lower;
+  }
+  return found;
+}
+
+// Короткая переходная или итоговая фраза («Разберём всё по порядку.»,
+// «Что делать в первую очередь?») не должна виснуть в хвосте уже
+// забитого текстового слайда или торчать одна на отдельном — переносим
+// её на следующий смысловой блок, даже через смену подзаголовка.
+// Трогаем только пары без картинок: у пары с картинкой последний блок —
+// это подпись бренда для pairLabel(), её задевать нельзя.
+const LEAD_IN_MAX = 60;   // «Разберём всё по порядку.» — 24, «Как проверить...?» — 50, «Что делать в первую очередь?» — 28
+function figmaAbsorbLeadIns(pairs){
+  // Несколько коротких строк подряд («Как проверить...?» + «Что делать в
+  // первую очередь?») должны уехать вперёд ЦЕЛИКОМ, одна за другой, а не
+  // только последняя. Один проход слева направо цепляет только «свежий»
+  // последний блок каждой пары — поэтому гоняем проход до тех пор, пока
+  // хоть что-то переносится (пар в реальной лекции немного, это дёшево).
+  let changed = true, guard = 0;
+  while(changed && guard++ < 20){
+    changed = false;
+    for(let i = 0; i < pairs.length - 1; i++){
+      const p = pairs[i];
+      if(p.imgs.length || !p.blocks.length) continue;
+      const last = p.blocks[p.blocks.length - 1];
+      if(!last || last.type !== 'p') continue;
+      const t = (last.text || '').trim();
+      if(!t || t.length > LEAD_IN_MAX) continue;
+      pairs[i + 1].blocks.unshift(last);
+      p.blocks.pop();
+      changed = true;
+    }
+  }
+  // Пары, опустевшие после переноса (например, отдельный жирный
+  // подзаголовок сам по себе) — из списка убираем, иначе останется
+  // пустой слайд.
+  return pairs.filter(p => p.blocks.length || p.imgs.length);
+}
+
+// Короткий итог сразу после снимков («Если приложение находится —
+// значит оно есть...») не должен улетать на свой отдельный текстовый
+// слайд — клеим его к только что собранному слайду с картинками,
+// переключая раскладку на «снимки слева, текст справа» (там и находится
+// место под лишний абзац).
+const TRAILING_TEXT_MAX = 200;
+function figmaAbsorbTrailing(cols, pairs, i){
+  const nx = pairs[i];
+  if(!nx || nx.imgs.length || nx.newSection || nx.hardBreak || !nx.blocks.length) return null;
+  const cost = nx.blocks.reduce((a,b)=>a + figmaCost(b), 0);
+  if(cost > TRAILING_TEXT_MAX) return null;
+  return [...cols, {heading: cols[0].heading, blocks: nx.blocks, imgs: []}];
+}
+
 // 4. Пары раскладываем по слайдам
 function figmaGroup(blocks){
-  const pairs = figmaPairs(blocks);
+  const pairs = figmaAbsorbLeadIns(figmaPairs(blocks));
   const slides = [];
 
   const MAX_PHONE_COLS = 4;   // колонок с коротким текстом в ряд
-  const MAX_PHONE_SIDE = 2;   // снимков в связке, когда текста много и он ушёл вбок
-  const MAX_TEXT_H = 440;
+  // Снимков в связке, когда текста много и он ушёл вбок. Было 2 — узкий
+  // потолок разбивал ровную тройку брендов (Iphone/Samsung/Xiaomi) на
+  // слайд из 2 и слайд-огрызок из 1, как только текст в связке набирал
+  // вес (например, после того как к нему подъезжает переходная фраза
+  // через figmaAbsorbLeadIns). 3 — тройка помещается целиком.
+  const MAX_PHONE_SIDE = 3;
+  // Потолок для склейки чисто текстовых слайдов одной темы. Был 440 —
+  // резало темы на огрызки. Подняли до 1050 — стало слипаться в другую
+  // крайность: на один слайд утрамбовывалось сразу два смысловых блока
+  // (вступление+примеры и отдельное «правило» после них). 700 — золотая
+  // середина: обычная тема на 2 связки (пример: «Что показывает Google
+  // Карты», ~600) склеивается целиком, а более длинная режется. Плюс
+  // жёсткая граница по hardBreak (см. figmaPairs) — она режет тему по
+  // смыслу, перед подзаголовком-жирной строкой, независимо от «стоимости».
+  const MAX_TEXT_H = 700;
   const MAX_GLASS_H = 300;   // стеклянная плашка поверх скриншота уже текстовой панели — тексту там теснее
 
   let i = 0;
@@ -821,41 +995,88 @@ function figmaGroup(blocks){
     }
 
     if(kind === 'phone'){
-      // У телефонной пары два варианта раскладки в зависимости от того,
-      // сколько текста относится к картинке (примерно 5 строк — потолок):
-      // - текста немного → колонками, текст над снимком, до 4 в ряд;
-      // - текста много → снимок(и) слева, текст одним блоком справа,
-      //   не больше 2 снимков в связке (иначе теснее некуда).
+      // Колонки (текст над снимком) годятся только когда картинок реально
+      // много — 3-4. С одной-двумя колонки смотрятся пусто, там нужна
+      // раскладка «снимки слева, текст справа». Поэтому сперва пробуем
+      // набрать колонками подряд идущие пары с коротким текстом (до 5
+      // строк) — и берём этот вариант, только если картинок набралось ≥3.
       const textCost = pair.blocks.reduce((a,b)=>a + figmaCost(b), 0);
-      const short = textCost <= FG.PHONE_SHORT_TEXT && pair.imgs.length <= MAX_PHONE_COLS;
+      const startShort = textCost <= FG.PHONE_SHORT_TEXT;
 
       const cols = [];
       let total = 0;
+      const seenLabels = new Set();
+      if(startShort){
+        while(i < pairs.length){
+          const nx = pairs[i];
+          if(pairKind(nx) !== 'phone') break;
+          if(cols.length && (nx.newSection || nx.hardBreak)) break;
+          const nxCost = nx.blocks.reduce((a,b)=>a + figmaCost(b), 0);
+          if(nxCost > FG.PHONE_SHORT_TEXT) break;
+          if(total + nx.imgs.length > MAX_PHONE_COLS) break;
+          // Подписи-бренды («Iphone», «Samsung», «Xiaomi») идут по одной на
+          // шаг инструкции. Как только ярлык повторился — начался новый
+          // шаг, а не продолжение текущего набора «3 бренда подряд».
+          const label = pairLabel(nx);
+          if(label){
+            if(seenLabels.has(label)) break;
+            seenLabels.add(label);
+          }
+          cols.push(nx); total += nx.imgs.length;
+          i++;
+        }
+      }
+      if(startShort && total >= 3){
+        // Короткий итог сразу после тройки — клеим к ней же (см.
+        // figmaAbsorbTrailing), тройка при этом переезжает в раскладку
+        // «снимки слева, текст справа», иначе абзацу негде поместиться.
+        const withTrailing = figmaAbsorbTrailing(cols, pairs, i);
+        if(withTrailing){
+          slides.push({layout:'phone-side', heading: cols[0].heading, cols: withTrailing});
+          i++;
+        } else {
+          slides.push({layout:'phone-cols', heading: cols[0].heading, cols});
+        }
+        continue;
+      }
+
+      // Картинок мало (1-3): снимки слева, текст справа. Если есть место,
+      // подхватываем и следующую пару той же темы, даже если у неё текста
+      // мало, — чтобы одиночный снимок не оставался один на отдельном
+      // слайде.
       while(i < pairs.length){
         const nx = pairs[i];
         if(pairKind(nx) !== 'phone') break;
-        if(cols.length && nx.newSection) break;
-        const nxCost = nx.blocks.reduce((a,b)=>a + figmaCost(b), 0);
-        const nxShort = nxCost <= FG.PHONE_SHORT_TEXT;
-        if(nxShort !== short) break;                          // не мешаем короткие и длинные в одном слайде
-        const limit = short ? MAX_PHONE_COLS : MAX_PHONE_SIDE;
-        if(total + nx.imgs.length > limit) break;
+        if(cols.length && (nx.newSection || nx.hardBreak)) break;
+        if(total + nx.imgs.length > MAX_PHONE_SIDE) break;
+        const label = pairLabel(nx);
+        if(label){
+          if(seenLabels.has(label)) break;
+          seenLabels.add(label);
+        }
         cols.push(nx); total += nx.imgs.length;
         i++;
       }
-      slides.push({layout: short ? 'phone-cols' : 'phone-side', heading: cols[0].heading, cols});
+      const withTrailing = figmaAbsorbTrailing(cols, pairs, i);
+      if(withTrailing){
+        slides.push({layout:'phone-side', heading: cols[0].heading, cols: withTrailing});
+        i++;
+      } else {
+        slides.push({layout:'phone-side', heading: cols[0].heading, cols});
+      }
       continue;
     }
 
     // Текст без картинок. Соседние текстовые куски одного раздела
-    // сливаем, пока панель не переполнится
+    // сливаем, пока панель не переполнится — и не дальше жёсткой границы
+    // (hardBreak), которая режет тему по смыслу перед подзаголовком.
     const textPair = {layout:'text', heading: pair.heading, blocks: [...pair.blocks], imgs: []};
     let h = pair.heading ? 42 : 0;
     for(const b of pair.blocks) h += figmaCost(b);
     i++;
     while(i < pairs.length){
       const nx = pairs[i];
-      if(pairKind(nx) !== 'text' || nx.newSection) break;
+      if(pairKind(nx) !== 'text' || nx.newSection || nx.hardBreak) break;
       const add = nx.blocks.reduce((a,b)=>a + figmaCost(b), 0);
       if(h + add > MAX_TEXT_H) break;
       textPair.blocks.push(...nx.blocks); h += add;
@@ -1224,6 +1445,427 @@ ${inner}</body>
 </html>`;
 
   return figmaSplit([cover, toc, ...body], shell);
+}
+</script>
+<script>
+// ── Программа курса (PDF) → карточка курса (YAML) + файл для плагина Figma ──
+//
+// Порт engine/course_import.py и engine/course.py (завод, F:\MediaCombine).
+// Правила разбора и дат — те же; поменялись там — поменять и здесь.
+//
+// Программы SmartComp пишутся по одному шаблону: «N встреча (дата время) –
+// Лекция N. Название», перенос названия строкой с маленькой буквы, пункты
+// через «-», вступление «На лекции разберем:» выбрасывается. Нумерацию
+// лекций считаем сами и чиним ошибку программы (октябрь 2026: две
+// «Лекции 3») — каждую починку показываем. Опечатки не правим.
+
+// Группы идут в одни и те же дни, различается время. Встреча выпускников —
+// в 19:00. Так уже лет пять.
+const CP_GROUPS = {A: '14:00', B: '19:00'};
+const CP_GRADUATES_TIME = '19:00';
+const CP_MONTHS = ['января','февраля','марта','апреля','мая','июня','июля',
+                   'августа','сентября','октября','ноября','декабря'];
+const CP_WEEKDAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+
+const CP_HEADER = /^(\d+)\s*встреч[а-яё]*\s*\(\s*(\d{1,2})\s+([а-яё]+)\s+(\d{1,2}:\d{2})\s*\)\s*[–—-]\s*(.+)$/i;
+const CP_LECTURE = /^Лекция\s*№?\s*(\d+)\s*[.:]?\s*(.*)$/i;
+// \b в JS не видит кириллицу — граница слова через просмотр вперёд
+const CP_PRACTICE = /^Практика(?![а-яё]).*?№\s*(\d+)/i;
+const CP_START = /Дата\s+старта:?\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/;
+const CP_BULLET = /^[-–—•]\s*/;
+
+const CP_TRANSLIT = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',
+  м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',
+  ь:'',э:'e',ю:'yu',я:'ya'};
+
+// Даты — без часовых поясов: [год, месяц 1-12, день] через UTC.
+function cpDate(y, m, d){ return new Date(Date.UTC(y, m - 1, d)); }
+function cpIso(d){ return d.toISOString().slice(0, 10); }
+function cpAddDays(d, n){ return new Date(d.getTime() + n * 86400000); }
+function cpDateText(d){ return d.getUTCDate() + ' ' + CP_MONTHS[d.getUTCMonth()]; }
+function cpDDMM(d, withYear){
+  const p = n => String(n).padStart(2, '0');
+  return p(d.getUTCDate()) + '.' + p(d.getUTCMonth() + 1) + (withYear ? '.' + d.getUTCFullYear() : '');
+}
+
+// Старт курса: первая ср или вс месяца, не раньше 3-го.
+function cpCourseStart(y, m){
+  let d = cpDate(y, m, 3);
+  while(d.getUTCDay() !== 3 && d.getUTCDay() !== 0) d = cpAddDays(d, 1);
+  return d;
+}
+// Встреча выпускников: первый вторник после старта следующего курса
+// (верно примерно в 80% случаев; точную дату объявляют на последней лекции).
+function cpGuessGraduates(start){
+  const y = start.getUTCMonth() === 11 ? start.getUTCFullYear() + 1 : start.getUTCFullYear();
+  const m = start.getUTCMonth() === 11 ? 1 : start.getUTCMonth() + 2;
+  let d = cpAddDays(cpCourseStart(y, m), 1);
+  while(d.getUTCDay() !== 2) d = cpAddDays(d, 1);
+  return d;
+}
+
+function cpClean(s){
+  return s.replace(/\s+/g, ' ').trim().replace(/"([^"]+)"/g, '«$1»');
+}
+function cpStartsLower(line){
+  const ch = line.replace(/^[«"(]+/, '').charAt(0);
+  return ch !== ch.toUpperCase() && ch === ch.toLowerCase();
+}
+function cpSlug(title){
+  return title.toLowerCase().split('').map(c => c in CP_TRANSLIT ? CP_TRANSLIT[c] : c).join('')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+// Разбор текста программы: {course, start, meetings}, fixes — что починено.
+function cpParse(text){
+  const fixes = [];
+  const flat = text.replace(/\s+/g, ' ');
+  let m = flat.match(/«([^»]+)»/);
+  const course = m ? cpClean(m[1]) : '';
+  if(!course) fixes.push('не нашёл название курса в «кавычках» — вписать руками');
+  m = flat.match(CP_START);
+  let start = m ? cpDate(+m[3], +m[2], +m[1]) : null;
+
+  const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const blocks = [];
+  let cur = null;
+  for(const ln of lines){
+    const h = ln.match(CP_HEADER);
+    if(h){
+      cur = {number: +h[1], day: +h[2], month: h[3].toLowerCase(), time: h[4],
+             title: h[5], titleOpen: true, body: []};
+      blocks.push(cur);
+      continue;
+    }
+    if(!cur) continue;
+    if(cur.titleOpen && !CP_BULLET.test(ln) && cpStartsLower(ln)){ cur.title += ' ' + ln; continue; }
+    cur.titleOpen = false;
+    cur.body.push(ln);
+  }
+  if(!blocks.length) fixes.push('не нашёл ни одной встречи «N встреча (дата время) – …»');
+
+  const year = start ? start.getUTCFullYear() : new Date().getFullYear();
+  const firstMonth = blocks.length ? CP_MONTHS.indexOf(blocks[0].month) + 1 : 0;
+  const meetings = [];
+  let lectureNo = 0;
+  blocks.forEach((b, idx) => {
+    const i = idx + 1;
+    const where = 'встреча ' + b.number;
+    if(b.number !== i) fixes.push(`${where}: в программе номер ${b.number}, по порядку ${i} — исправлено`);
+    const month = CP_MONTHS.indexOf(b.month) + 1;
+    if(!month){ fixes.push(`${where}: не понял месяц «${b.month}»`); return; }
+    const date = cpDate(firstMonth && month < firstMonth ? year + 1 : year, month, b.day);
+
+    let title = cpClean(b.title), type, lecture;
+    const lm = title.match(CP_LECTURE), pm = title.match(CP_PRACTICE);
+    if(lm){
+      type = 'lecture'; lectureNo++;
+      if(+lm[1] !== lectureNo) fixes.push(`${where}: в программе «Лекция ${lm[1]}», по счёту это лекция ${lectureNo} — исправлено`);
+      title = lm[2]; lecture = lectureNo;
+    }else if(pm){
+      type = 'practice'; lecture = lectureNo || +pm[1];
+      if(+pm[1] !== lecture){
+        fixes.push(`${where}: практика «по лекции №${pm[1]}», а последней была лекция ${lecture} — исправлено`);
+        title = title.replace(/№\s*\d+/, '№' + lecture);
+      }
+    }else{
+      type = 'other'; lecture = lectureNo;
+      fixes.push(`${where}: ни «Лекция N», ни «Практика … №N» — тип проставить руками`);
+    }
+
+    const about = [];
+    for(const ln of b.body){
+      if(CP_BULLET.test(ln)) about.push(ln.replace(CP_BULLET, ''));
+      else if(/:\s*$/.test(ln) && !about.length) continue;      // «На первой лекции разберем:»
+      else if(about.length) about[about.length - 1] += ' ' + ln;
+      else about.push(ln);
+    }
+    meetings.push({number: i, date, time: b.time, type, lecture, title,
+                   about: about.filter(a => a.trim()).map(cpClean)});
+  });
+
+  const times = [...new Set(meetings.map(x => x.time))].sort();
+  const groupTimes = Object.values(CP_GROUPS);
+  if(times.length > 1) fixes.push('в программе разное время встреч: ' + times.join(', '));
+  else if(times.length && !groupTimes.includes(times[0]))
+    fixes.push(`время встреч ${times[0]} — не время ни одной группы (${groupTimes.join(', ')})`);
+  if(meetings.length && start && cpIso(meetings[0].date) !== cpIso(start))
+    fixes.push(`«Дата старта» ${cpIso(start)} не совпадает с первой встречей ${cpIso(meetings[0].date)}`);
+  if(meetings.length && !start) start = meetings[0].date;
+
+  return {card: {course, start, meetings}, fixes};
+}
+
+// Проверка арифметики (как engine/course.py check): ошибка — не пускать в работу.
+function cpCheck(card){
+  const errors = [], notes = [];
+  const ms = card.meetings;
+  if(!card.course) errors.push('нет названия курса');
+  if(!ms.length){ errors.push('нет ни одной встречи'); return {errors, notes}; }
+  const first = ms[0].date;
+  if(cpIso(first) !== cpIso(cpCourseStart(first.getUTCFullYear(), first.getUTCMonth() + 1)))
+    notes.push(`старт ${cpDateText(first)} (${CP_WEEKDAYS[first.getUTCDay()]}) — не по обычной схеме: ` +
+               'первая ср или вс месяца не раньше 3-го');
+  let prev = null, prevLecture = 0;
+  ms.forEach((m, i) => {
+    if(prev && m.date <= prev) errors.push(`встреча ${m.number}: дата не позже предыдущей`);
+    prev = m.date;
+    if(m.type === 'lecture' && m.lecture !== prevLecture + 1)
+      errors.push(`встреча ${m.number}: лекция №${m.lecture}, а ждём №${prevLecture + 1}`);
+    if(m.type === 'practice' && m.lecture !== prevLecture)
+      errors.push(`встреча ${m.number}: практика по лекции №${m.lecture}, а последней была №${prevLecture}`);
+    prevLecture = m.lecture;
+  });
+  return {errors, notes};
+}
+
+// Карточка текстом — тот же вид, что у engine/course_import.py.
+function cpYaml(card, fixes, source){
+  const q = s => JSON.stringify(s);   // JSON-строка — валидная строка YAML
+  const grad = cpGuessGraduates(card.start);
+  const today = new Date();
+  const out = [
+    '# ' + '='.repeat(69),
+    '#  Карточка курса — один источник для всех артефактов курса.',
+    `#  Собрана конвертером из «${source}»`,
+    `#  ${cpDDMM(cpDate(today.getFullYear(), today.getMonth() + 1, today.getDate()), true)}. Опечатки не правятся — прочитать глазами.`,
+  ];
+  if(fixes.length){ out.push('#  Исправлено / посмотреть:'); fixes.forEach(f => out.push('#    - ' + f)); }
+  out.push('# ' + '='.repeat(69), '',
+    'course: ' + q(card.course),
+    'start: ' + cpIso(card.start), '',
+    '# Группы идут по одним датам, различается только время.',
+    'groups:',
+    ...Object.entries(CP_GROUPS).map(([g, t]) => `  ${g}: { time: "${t}" }`), '',
+    '# number — номер встречи; lecture — номер лекции (у практики — той,',
+    '# что она разбирает). about — описание из программы, по пункту.',
+    'meetings:');
+  card.meetings.forEach(m => {
+    out.push(`  - number: ${m.number}`, `    date: ${cpIso(m.date)}`, `    type: ${m.type}`,
+             `    lecture: ${m.lecture}`, `    title: ${q(m.title)}`, '    about:',
+             ...m.about.map(a => '      - ' + q(a)), '');
+  });
+  out.push('# Встреча выпускников: дату объявляют на последней лекции. До того —',
+    '# предположение: первый вторник после старта следующего курса.',
+    'graduates:', '  date: ' + cpIso(grad), `  time: "${CP_GRADUATES_TIME}"`,
+    '  confirmed: false        # true — когда дату объявили на лекции', '');
+  return out.join('\n');
+}
+
+// Файл для плагина Figma (как engine/course.py for_figma).
+function cpForFigma(card, style){
+  const grad = cpGuessGraduates(card.start);
+  const meetings = card.meetings.map(m => {
+    const title = m.type === 'lecture' ? `Лекция ${m.lecture}. ${m.title}` : m.title;
+    const full = m.about.length === 1 ? m.about[0] : m.about.map(a => '• ' + a).join('\n');
+    return {number: m.number, type: m.type, lecture: m.lecture, date: cpIso(m.date), image: '',
+      fields: {'название_лекции': title, 'описание_лекции': full, 'подзаголовок_лекции': '',
+               'дата_лекции': cpDateText(m.date), 'номер_лекции': String(m.lecture),
+               'номер_встречи': String(m.number)}};
+  });
+  const groups = {};
+  Object.entries(CP_GROUPS).forEach(([g, t]) => { groups[g] = {fields: {'время': t, 'время_лекции': t}}; });
+  return {
+    course: card.course,
+    image_style: style || '',
+    fields: {'название_курса': card.course, 'дата_старта': cpDDMM(card.start, true),
+             'дата_выпускников': cpDDMM(grad, false), 'время_выпускников': CP_GRADUATES_TIME},
+    groups, meetings,
+    graduates: {date: cpIso(grad), confirmed: false,
+      fields: {'название_лекции': 'Встреча выпускников', 'описание_лекции': '', 'подзаголовок_лекции': '',
+               'дата_лекции': cpDateText(grad), 'номер_лекции': '', 'номер_встречи': '',
+               'время': CP_GRADUATES_TIME, 'время_лекции': CP_GRADUATES_TIME}}
+  };
+}
+
+
+// ── Интерфейс: PDF программы → карточка курса в папку клиента ──
+
+const CP_PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/';
+let _cpPdfjs = null;
+let _cpResult = null;   // {name, yaml, card, fixes, errors, source}
+
+// pdf.js грузим только когда пришёл PDF — DOCX-ветке он не нужен.
+// Воркер — через blob: страница открывается и с диска (file://), а
+// воркер с чужого адреса браузер так не запустит.
+async function cpLoadPdfjs(){
+  if(_cpPdfjs) return _cpPdfjs;
+  await new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = CP_PDFJS + 'pdf.min.js';
+    s.onload = ok;
+    s.onerror = () => fail(new Error('не загрузился pdf.js — нет интернета?'));
+    document.head.appendChild(s);
+  });
+  const w = await (await fetch(CP_PDFJS + 'pdf.worker.min.js')).text();
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([w], {type: 'text/javascript'}));
+  return (_cpPdfjs = window.pdfjsLib);
+}
+
+async function cpPdfText(file){
+  const pdfjs = await cpLoadPdfjs();
+  const doc = await pdfjs.getDocument({data: new Uint8Array(await file.arrayBuffer())}).promise;
+  let text = '';
+  for(let i = 1; i <= doc.numPages; i++){
+    const content = await (await doc.getPage(i)).getTextContent();
+    for(const it of content.items){ text += it.str; if(it.hasEOL) text += '\n'; }
+    text += '\n';
+  }
+  return text;
+}
+
+function cpEsc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function processProgram(file){
+  document.getElementById('dropZone').style.display = 'none';
+  document.getElementById('status').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  try{
+    setProgress(20, 'Читаю PDF программы...');
+    const text = await cpPdfText(file);
+    setProgress(70, 'Разбираю встречи...');
+    const {card, fixes} = cpParse(text);
+    if(!card.meetings.length || !card.start)
+      throw new Error('не нашёл встреч «N встреча (дата время) – …» — это программа курса?');
+    const {errors, notes} = cpCheck(card);
+    const name = cpIso(card.start).slice(0, 7) + '_' + cpSlug(card.course);
+    _cpResult = {name, card, fixes, errors, source: file.name, yaml: cpYaml(card, fixes, file.name)};
+    setProgress(100, 'Готово!');
+    cpShowResult(notes);
+  }catch(e){
+    setProgress(100, 'Не вышло: ' + e.message);
+    setTimeout(resetUI, 5000);
+  }
+}
+
+function cpShowResult(notes){
+  const r = _cpResult, c = r.card;
+  const grad = cpGuessGraduates(c.start);
+  const kind = m => m.type === 'lecture' ? 'Лекция ' + m.lecture
+                  : m.type === 'practice' ? 'Практика по ' + m.lecture : '??';
+  const list = c.meetings.map(m =>
+    `<li><b>${m.number}.</b> ${cpDateText(m.date)} · ${kind(m)} — ${cpEsc(m.title)}</li>`).join('');
+  const box = (cls, head, items) => items.length
+    ? `<div class="cp-box ${cls}"><b>${head}</b><ul>${items.map(x => '<li>' + cpEsc(x) + '</li>').join('')}</ul></div>`
+    : '';
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('status').style.display = 'none';
+  document.querySelector('.mode-toggle').style.display = 'none';
+  document.getElementById('modeHint').style.display = 'none';
+  document.getElementById('resultMeta').innerHTML =
+    `🎓 Курс: <span>${cpEsc(c.course)}</span><br>` +
+    `📅 Старт: <span>${cpDateText(c.start)}, ${CP_WEEKDAYS[c.start.getUTCDay()]}</span><br>` +
+    `🎉 Выпускники: <span>${cpDateText(grad)}, ${CP_GRADUATES_TIME}</span> — предположение<br>` +
+    `📄 Файл: <span>${cpEsc(r.name)}.yaml</span> + .json для плагина Figma` +
+    `<ul class="cp-list">${list}</ul>` +
+    box('cp-err', 'Ошибки — не сохраняю, сначала поправить:', r.errors) +
+    box('cp-fix', 'Исправлено по ходу (записано и в шапку карточки):', r.fixes) +
+    box('cp-note', 'Заметки:', notes) +
+    '<p class="cp-hint">Опечатки не правятся — они видны в Figma.</p>';
+
+  const dl = document.getElementById('dlBox');
+  dl.innerHTML = '';
+  const btn = (label, cls, fn) => {
+    const b = document.createElement('button');
+    b.className = cls; b.textContent = label; b.onclick = fn; dl.appendChild(b);
+  };
+  if(r.errors.length) return;
+  if(window.showDirectoryPicker){
+    btn('💾 Сохранить в папку клиента', 'btn-download', () => cpSave(false));
+    btn('Выбрать другую папку клиента', 'btn-reset cp-small', () => cpSave(true));
+    btn('⬇️ Просто скачать YAML и JSON', 'btn-reset cp-small', cpDownload);
+  }else{
+    btn('⬇️ Скачать YAML и JSON', 'btn-download', cpDownload);
+  }
+}
+
+// ── Папка клиента: выбирается один раз, помнится в IndexedDB ──
+// Это F:\MediaCombine\clients\smartcomp — в ней client.yaml. Карточки
+// ложатся в courses\, стиль картинок берётся из assets\image-style.md.
+function cpDb(){
+  return new Promise((ok, fail) => {
+    const rq = indexedDB.open('smartcomp-converter', 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore('handles');
+    rq.onsuccess = () => ok(rq.result);
+    rq.onerror = () => fail(rq.error);
+  });
+}
+async function cpHandle(set){
+  try{
+    const db = await cpDb();
+    return await new Promise((ok, fail) => {
+      const st = db.transaction('handles', set ? 'readwrite' : 'readonly').objectStore('handles');
+      const rq = set ? st.put(set, 'client') : st.get('client');
+      rq.onsuccess = () => ok(set || rq.result);
+      rq.onerror = () => fail(rq.error);
+    });
+  }catch(e){ return set || null; }   // приватный режим — просто не помним
+}
+
+async function cpClientDir(pickNew){
+  let dir = pickNew ? null : await cpHandle();
+  if(dir && (await dir.queryPermission({mode: 'readwrite'})) !== 'granted' &&
+     (await dir.requestPermission({mode: 'readwrite'})) !== 'granted') dir = null;
+  if(!dir){
+    dir = await window.showDirectoryPicker({id: 'smartcomp-client', mode: 'readwrite'});
+    try{ await dir.getFileHandle('client.yaml'); }
+    catch(e){
+      alert('Это не папка клиента: в ней нет client.yaml.\nНужна F:\\MediaCombine\\clients\\smartcomp');
+      return null;
+    }
+    await cpHandle(dir);
+  }
+  return dir;
+}
+
+async function cpStyle(dir){
+  try{
+    const assets = await dir.getDirectoryHandle('assets');
+    const md = await (await (await assets.getFileHandle('image-style.md')).getFile()).text();
+    const m = md.match(/```style\s*\n([\s\S]*?)```/);
+    return m ? m[1].split(/\s+/).join(' ').trim() : '';
+  }catch(e){ return ''; }
+}
+
+async function cpWrite(dir, name, text){
+  const w = await (await dir.getFileHandle(name, {create: true})).createWritable();
+  await w.write(text);
+  await w.close();
+}
+
+async function cpSave(pickNew){
+  const r = _cpResult;
+  try{
+    const dir = await cpClientDir(pickNew);
+    if(!dir) return;
+    const courses = await dir.getDirectoryHandle('courses', {create: true});
+    let exists = true;
+    try{ await courses.getFileHandle(r.name + '.yaml'); }catch(e){ exists = false; }
+    if(exists && !confirm(`Карточка ${r.name}.yaml уже есть — её могли править руками.\nПерезаписать?`)) return;
+    const style = await cpStyle(dir);
+    await cpWrite(courses, r.name + '.yaml', r.yaml);
+    await cpWrite(courses, r.name + '.json', JSON.stringify(cpForFigma(r.card, style), null, 2));
+    document.getElementById('dlBox').insertAdjacentHTML('afterbegin',
+      `<div class="cp-box cp-ok">Сохранено в <b>${cpEsc(dir.name)}\\courses\\</b>: ${cpEsc(r.name)}.yaml и .json` +
+      (style ? '' : '<br>Стиль картинок не найден (assets\\image-style.md) — в промпте его не будет.') +
+      '</div>');
+  }catch(e){
+    if(e.name !== 'AbortError') alert('Не сохранилось: ' + e.message);
+  }
+}
+
+function cpDownload(){
+  const r = _cpResult;
+  const save = (text, name, type) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], {type}));
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  save(r.yaml, r.name + '.yaml', 'text/yaml;charset=utf-8');
+  setTimeout(() => save(JSON.stringify(cpForFigma(r.card, ''), null, 2), r.name + '.json', 'application/json'), 300);
 }
 </script>
 </body>
